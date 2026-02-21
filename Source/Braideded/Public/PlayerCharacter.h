@@ -7,6 +7,7 @@
 #include "InputActionValue.h"
 #include "Rewindable.h"
 #include "IAction.h"
+#include "MyCharacter.h"
 #include "PlayerCharacter.generated.h"
 
 /**
@@ -20,7 +21,7 @@ class UPaperFlipbook;
 
 
 UCLASS()
-class BRAIDEDED_API APlayerCharacter : public APaperCharacter, public IRewindable
+class BRAIDEDED_API APlayerCharacter : public AMyCharacter, public IRewindable
 {
 	GENERATED_BODY()
 	
@@ -31,25 +32,25 @@ class BRAIDEDED_API APlayerCharacter : public APaperCharacter, public IRewindabl
 public:
 	APlayerCharacter();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
-	float WalkSpeed;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
-	float SprintSpeed;
-
 	virtual void BeginPlay() override;
-	virtual void Tick(float DeltaTime) override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	virtual void Landed(const FHitResult& Hit) override;
 
-	//Input
+	//INPUT
 	void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputMappingContext* DefaultMappingContext;
 
 	UPROPERTY(EditAnywhere, Category = "Input")
-	UInputMappingContext* RewindMappingContext;
+	UInputMappingContext* Ability1MappingContext;
+
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputMappingContext* Ability2MappingContext;
+
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputMappingContext* Ability3MappingContext;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputAction* MoveAction;
@@ -58,30 +59,27 @@ public:
 	UInputAction* JumpAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
-	UInputAction* Action1;
+	UInputAction* IAction1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
-	UInputAction* Action2;
+	UInputAction* IAction2;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
-	UInputAction* Action3;
+	UInputAction* IAction3;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
-	UInputAction* DeactivateAction1;
+	UInputAction* IDeactivateAction1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	UInputAction* IDeactivateAction2;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	UInputAction* IDeactivateAction3;
 
 
 
 
-	//Flipbooks
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Flipbook")
-	UPaperFlipbook* IdleFlipbook;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Flipbook")
-	UPaperFlipbook* WalkFlipbook;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Flipbook")
-	UPaperFlipbook* JumpFlipbook;
-
+	//FLIPBOOKS
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Flipbook")
 	UPaperFlipbook* Action1Flipbook;
 
@@ -92,8 +90,7 @@ public:
 	UPaperFlipbook* Action3Flipbook;
 
 
-	//Functions
-
+	//REWIND INTERFACE FUNCTIONS
 	virtual FCharacterData IGetCharacterSnapshot_Implementation() override;
 	virtual void ISetCharacterSnapshot_Implementation(FCharacterData CharData) override;
 	virtual void IEnterRewindState_Implementation() override;
@@ -101,38 +98,50 @@ public:
 	virtual void IRewind_Implementation() override;
 	virtual void IRollback_Implementation() override;
 
-
-private:
-
-	UPaperFlipbookComponent* FlipbookComponent;
-	UCharacterMovementComponent* CharacterComponent;
-	bool isGrounded;
-	bool isRewinding;
-	bool canRecord;
-
 protected:
 
+	//CAMERA COMPONENTS
 	UPROPERTY (EditAnywhere, Category = "Camera")
 	class USpringArmComponent* SpringArmComponent;
 
 	UPROPERTY(EditAnywhere, Category = "Camera")
 	class UCameraComponent* CameraComponent;
 
-	UActorComponent* AbilityComponent1;
-	UActorComponent* AbilityComponent2;
-	UActorComponent* AbilityComponent3;
 
-	UObject* Ability1;
+	//ACTION VARIABLES
+	UPROPERTY(EditAnywhere, Category = "Actions", meta = (MustImplement = "/Script/BRAIDEDED.Action"))
+	TSubclassOf<UActorComponent> Action1;
 
+	UPROPERTY(EditAnywhere, Category = "Actions", meta = (MustImplement = "/Script/BRAIDEDED.Action"))
+	TSubclassOf<UActorComponent> Action2;
 
-	void IMove(const FInputActionValue& Value);
-	void IStopMove(const FInputActionValue& Value);
-	void IJump(const FInputActionValue& Value);
-	void IStopJumping(const FInputActionValue& Value);
-	void IAction1(const FInputActionValue& Value);
-	void IAction2(const FInputActionValue& Value);
-	void IAction3(const FInputActionValue& Value);
-	void IDeactivateAction1(const FInputActionValue& Value);
+	UPROPERTY(EditAnywhere, Category = "Actions", meta = (MustImplement = "/Script/BRAIDEDED.Action"))
+	TSubclassOf<UActorComponent> Action3;
+
+	UActorComponent* ActionComponent1;
+	UActorComponent* ActionComponent2;
+	UActorComponent* ActionComponent3;
+
+	UObject* ActionObj1;
+	UObject* ActionObj2;
+	UObject* ActionObj3;
+
+	//MOVEMENT FUNCTIONS	
+	void Walk(const FInputActionValue& Value);
+	void StopWalk(const FInputActionValue& Value);
+	void StartJump(const FInputActionValue& Value);
+	void StopJump(const FInputActionValue& Value);
+
+	//ACTION FUNCTIONS
+	void ActivateAction1(const FInputActionValue& Value);
+	void ActivateAction2(const FInputActionValue& Value);
+	void ActivateAction3(const FInputActionValue& Value);
+	void FDeactivateAction1(const FInputActionValue& Value);
+	void FDeactivateAction2(const FInputActionValue& Value);
+	void FDeactivateAction3(const FInputActionValue& Value);
+
+	void SetActions();
+	void ClearActions();
 
 	void Idle();
 };

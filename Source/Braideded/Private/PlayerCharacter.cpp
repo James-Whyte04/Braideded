@@ -11,8 +11,6 @@
 #include "Components/InputComponent.h"
 #include "GameFramework/PlayerController.h"
 #include "Kismet/GameplayStatics.h"
-#include "PaperFlipbookComponent.h"
-#include "PaperFlipbook.h"
 #include "AC_Rewind.h"
 
 
@@ -36,8 +34,6 @@ APlayerCharacter::APlayerCharacter()
 
 	FlipbookComponent = GetSprite();
 	CharacterComponent = GetCharacterMovement();
-
-	AbilityComponent1 = CreateDefaultSubobject<UAC_Rewind>(TEXT("AbilityComponent1"));
 }
 
 
@@ -58,34 +54,11 @@ void APlayerCharacter::BeginPlay()
 		}
 	}
 
-	if (AbilityComponent1 && AbilityComponent1->GetClass()->ImplementsInterface(UAction::StaticClass()))
-	{
-		Ability1 = Cast<UObject>(AbilityComponent1);
-
-		if (Ability1 != nullptr) 
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Casted"));
-		}
-		else 
-		{
-			UE_LOG(LogTemp, Warning, TEXT("NO CAST"));
-		}
-	}
+	SetActions();
 
 	isGrounded = true;
-	isRewinding = false;
-	canRecord = true;
 }
 
-void APlayerCharacter::Tick(float DeltaTime)
-{
-	// check if ability component is an IAction 
-
-	if (Ability1 == nullptr || !canRecord) return;
-
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Recording");
-	IAction::Execute_IRecord(Ability1);
-}
 
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -93,16 +66,18 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 	if (UEnhancedInputComponent* EIC = CastChecked<UEnhancedInputComponent>(PlayerInputComponent)) 
 	{
-		EIC->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APlayerCharacter::IMove);
+		EIC->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Walk);
 
-		EIC->BindAction(JumpAction, ETriggerEvent::Started, this, &APlayerCharacter::IJump);
-		EIC->BindAction(JumpAction, ETriggerEvent::Completed, this, &APlayerCharacter::IStopJumping);
+		EIC->BindAction(JumpAction, ETriggerEvent::Started, this, &APlayerCharacter::StartJump);
+		EIC->BindAction(JumpAction, ETriggerEvent::Completed, this, &APlayerCharacter::StopJump);
 
-		EIC->BindAction(Action1, ETriggerEvent::Triggered, this, &APlayerCharacter::IAction1);
-		EIC->BindAction(Action2, ETriggerEvent::Triggered, this, &APlayerCharacter::IAction2);
-		EIC->BindAction(Action3, ETriggerEvent::Triggered, this, &APlayerCharacter::IAction3);
+		EIC->BindAction(IAction1, ETriggerEvent::Triggered, this, &APlayerCharacter::ActivateAction1);
+		EIC->BindAction(IAction2, ETriggerEvent::Triggered, this, &APlayerCharacter::ActivateAction2);
+		EIC->BindAction(IAction3, ETriggerEvent::Triggered, this, &APlayerCharacter::ActivateAction3);
 
-		EIC->BindAction(DeactivateAction1, ETriggerEvent::Triggered, this, &APlayerCharacter::IDeactivateAction1);
+		EIC->BindAction(IDeactivateAction1, ETriggerEvent::Triggered, this, &APlayerCharacter::FDeactivateAction1);
+		EIC->BindAction(IDeactivateAction2, ETriggerEvent::Triggered, this, &APlayerCharacter::FDeactivateAction2);
+		EIC->BindAction(IDeactivateAction3, ETriggerEvent::Triggered, this, &APlayerCharacter::FDeactivateAction3);
 	}
 }
 
@@ -112,13 +87,13 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 // MOVEMENT FUNCTIONS
 
-void APlayerCharacter::IStopMove(const FInputActionValue& Value) 
+void APlayerCharacter::StopWalk(const FInputActionValue& Value) 
 {
 	if (!CharacterComponent->IsMovingOnGround()) return;
 	FlipbookComponent->SetFlipbook(IdleFlipbook);
 }
 
-void APlayerCharacter::IMove(const FInputActionValue& Value)
+void APlayerCharacter::Walk(const FInputActionValue& Value)
 {
 	if (CharacterComponent->IsFalling()) 
 	{
@@ -148,13 +123,13 @@ void APlayerCharacter::IMove(const FInputActionValue& Value)
 	}
 }
 
-void APlayerCharacter::IJump(const FInputActionValue& Value)
+void APlayerCharacter::StartJump(const FInputActionValue& Value)
 {
 	Jump();
 	FlipbookComponent->SetFlipbook(JumpFlipbook);
 }
 
-void APlayerCharacter::IStopJumping(const FInputActionValue& Value)
+void APlayerCharacter::StopJump(const FInputActionValue& Value)
 {
 	StopJumping();
 }
@@ -170,72 +145,73 @@ void APlayerCharacter::Landed(const FHitResult& Hit)
 
 
 
-// ABILITY FUNCTIONS
-
-void APlayerCharacter::IAction1(const FInputActionValue& Value)
+//ABILITY ACTIVATE FUNCTIONS
+void APlayerCharacter::ActivateAction1(const FInputActionValue& Value)
 {
-	canRecord = false;
 	// Implement action 1 behavior here
-	if (Ability1 == nullptr) return;
+	if (ActionObj1 == nullptr) return;
 	
-	if (!isRewinding) 
+
+	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
 	{
-		if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 		{
-			if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
-			{
-				Subsystem->RemoveMappingContext(DefaultMappingContext);
-				Subsystem->AddMappingContext(RewindMappingContext, 0);
-				isRewinding = true;
-			}
+			Subsystem->RemoveMappingContext(DefaultMappingContext);
+			Subsystem->AddMappingContext(Ability1MappingContext, 0);
 		}
 	}
 
-	IAction::Execute_IActivate(Ability1, Value.Get<float>());
+	IAction::Execute_IActivate(ActionObj1, Value.Get<float>());
 }
 
-void APlayerCharacter::IAction2(const FInputActionValue& Value)
+void APlayerCharacter::ActivateAction2(const FInputActionValue& Value)
 {
 	// Implement action 2 behavior here
 }
 
-void APlayerCharacter::IAction3(const FInputActionValue& Value)
+void APlayerCharacter::ActivateAction3(const FInputActionValue& Value)
 {
 	// Implement action 3 behavior here
 }
 
-void APlayerCharacter::IDeactivateAction1(const FInputActionValue& Value)
+
+//ABILITY DEACTIVATE FUNCTIONS
+void APlayerCharacter::FDeactivateAction1(const FInputActionValue& Value)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Deactivating");
-	if (Ability1 == nullptr) return;
-	if (isRewinding) 
+	if (ActionObj1 == nullptr) return;
+
+	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
 	{
-		if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 		{
-			if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
-			{
-				Subsystem->RemoveMappingContext(RewindMappingContext);
-				Subsystem->AddMappingContext(DefaultMappingContext, 0);
-				isRewinding = false;
-			}
+			Subsystem->RemoveMappingContext(Ability1MappingContext);
+			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
+	
+	IAction::Execute_IDeactivate(ActionObj1);
+}
 
-	IAction::Execute_IDeactivate(Ability1);
-	canRecord = true;
+void APlayerCharacter::FDeactivateAction2(const FInputActionValue& Value)
+{
+	// Implement action 2 deactivation behavior here
+}
+
+void APlayerCharacter::FDeactivateAction3(const FInputActionValue& Value)
+{
+	// Implement action 3 deactivation behavior here
 }
 
 
 
-
 // REWIND INTERFACE FUNCTIONS
-
 FCharacterData APlayerCharacter::IGetCharacterSnapshot_Implementation() 
 {
 	float PlaybackTime = FlipbookComponent->GetPlaybackPosition();
 
 	FCharacterData Char = FCharacterData(GetActorLocation(),
-		GetActorRotation(),
+		FlipbookComponent->GetRelativeRotation(),
 		GetVelocity(),
 		FlipbookComponent->GetFlipbook(),
 		FlipbookComponent->GetFlipbook()->GetKeyFrameIndexAtTime(PlaybackTime),
@@ -246,9 +222,10 @@ FCharacterData APlayerCharacter::IGetCharacterSnapshot_Implementation()
 void APlayerCharacter::ISetCharacterSnapshot_Implementation(FCharacterData CharData)
 {
 	// Set character pos, rot, flipbook, flipbook state
-	SetActorLocationAndRotation(CharData.CharacterPosition, CharData.CharacterRotation);
-	FlipbookComponent -> SetFlipbook(CharData.Flipbook);
-	FlipbookComponent -> SetPlaybackPosition(CharData.FlipbookFrame, true);
+	SetActorLocation(CharData.CharacterPosition);
+	FlipbookComponent->SetRelativeRotation(CharData.CharacterRotation);
+	FlipbookComponent->SetFlipbook(CharData.Flipbook);
+	FlipbookComponent->SetPlaybackPosition(CharData.FlipbookFrame, true);
 }
 
 void APlayerCharacter::IEnterRewindState_Implementation() 
@@ -263,7 +240,8 @@ void APlayerCharacter::IExitRewindState_Implementation(FCharacterData CharData)
 	GetCharacterMovement()->SetMovementMode(CharData.MovementMode);
 
 	//Set position and rotation
-	SetActorLocationAndRotation(CharData.CharacterPosition, CharData.CharacterRotation);
+	SetActorLocation(CharData.CharacterPosition);
+	FlipbookComponent->SetRelativeRotation(CharData.CharacterRotation);
 
 	//Set velocity
 	GetCharacterMovement()->Velocity = CharData.Velocity;
@@ -286,3 +264,42 @@ void APlayerCharacter::IRollback_Implementation()
 	// Set objects in motion again
 }
 
+void APlayerCharacter::SetActions()
+{
+	if (Action1)
+	{
+		ActionComponent1 = NewObject<UActorComponent>(this, Action1);
+		ActionComponent1->RegisterComponent();
+
+		ActionObj1 = Cast<UObject>(ActionComponent1);
+	}
+}
+
+void APlayerCharacter::ClearActions()
+{
+	if (ActionComponent1)
+	{
+		ActionComponent1->DestroyComponent();
+		ActionComponent1 = nullptr;
+		ActionObj1 = nullptr;
+	}
+	if (ActionComponent2)
+	{
+		ActionComponent2->DestroyComponent();
+		ActionComponent2 = nullptr;
+		ActionObj2 = nullptr;
+	}
+
+	if (ActionComponent3)
+	{
+		ActionComponent3->DestroyComponent();
+		ActionComponent3 = nullptr;
+		ActionObj3 = nullptr;
+	}
+}
+
+void APlayerCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	ClearActions();
+}

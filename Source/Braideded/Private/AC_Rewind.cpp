@@ -15,6 +15,11 @@ UAC_Rewind::UAC_Rewind()
 	currentBufferIndex = 1;
 }
 
+UAC_Rewind::~UAC_Rewind()
+{
+	IClear_Implementation();
+}
+
 
 
 
@@ -37,7 +42,7 @@ void UAC_Rewind::BeginPlay()
 		if (actor->GetClass()->ImplementsInterface(URewindable::StaticClass()))
 		{
 			RewindableActors.Add(actor);
-			UE_LOG(LogTemp, Warning, TEXT("ADDED"));
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Added")));;
 		}
 	}
 
@@ -49,6 +54,24 @@ void UAC_Rewind::BeginPlay()
 	}
 
 	isRewinding = false;
+	canRewind = true;
+	canRecord = true;
+}
+
+void UAC_Rewind::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	IClear_Implementation();
+}
+
+
+void UAC_Rewind::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	if (!canRecord) return;
+	UAC_Rewind::Execute_IRecord(this);
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "recording");
+
 }
 
 
@@ -86,6 +109,7 @@ void UAC_Rewind::IActivate_Implementation(float Value)
 	}
 
 	isRewinding = true;
+	canRecord = false;
 }
 
 
@@ -114,6 +138,7 @@ void UAC_Rewind::IDeactivate_Implementation()
 
 	currentBufferIndex = 1;
 	isRewinding = false;
+	canRecord = true;
 }
 
 
@@ -132,7 +157,7 @@ void UAC_Rewind::IRecord_Implementation()
 		}
 		ActorsStates[i].Add(Char);
 		
-		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, Char.CharacterPosition.ToString());
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, Char.CharacterPosition.ToString());
 	}
 }
 

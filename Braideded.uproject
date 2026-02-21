@@ -7,7 +7,10 @@
 		{
 			"Name": "Braideded",
 			"Type": "Runtime",
-			"LoadingPhase": "Default"
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"Paper2D"
+			]
 		}
 	],
 	"Plugins": [

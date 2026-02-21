@@ -18,6 +18,7 @@ class BRAIDEDED_API UAC_Rewind : public UActorComponent, public IAction
 public:	
 	// Sets default values for this component's properties
 	UAC_Rewind();
+	~UAC_Rewind();
 
 	// Interface functions
 	virtual void IActivate_Implementation(float Value) override;
@@ -26,12 +27,12 @@ public:
 	virtual void IClear_Implementation() override;
 	virtual float ITimeScale_Implementation() override;
 
-	// Called every frame
-	//virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	// Variables
 	float timeScale;
@@ -39,6 +40,7 @@ protected:
 	int currentBufferIndex;
 	bool isRewinding;
 	bool canRewind;
+	bool canRecord;
 
 	// Array for each character in the scene, Queue for the actor's states
 	TArray< TArray<FCharacterData> > ActorsStates;
