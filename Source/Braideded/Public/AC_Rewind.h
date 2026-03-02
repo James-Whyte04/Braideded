@@ -25,7 +25,6 @@ public:
 	virtual void IDeactivate_Implementation() override;
 	virtual void IRecord_Implementation() override;
 	virtual void IClear_Implementation() override;
-	virtual float ITimeScale_Implementation() override;
 
 
 protected:

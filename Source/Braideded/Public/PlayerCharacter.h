@@ -7,6 +7,7 @@
 #include "InputActionValue.h"
 #include "Rewindable.h"
 #include "IAction.h"
+#include "Dilatable.h"
 #include "MyCharacter.h"
 #include "PlayerCharacter.generated.h"
 
@@ -21,7 +22,7 @@ class UPaperFlipbook;
 
 
 UCLASS()
-class BRAIDEDED_API APlayerCharacter : public AMyCharacter, public IRewindable
+class BRAIDEDED_API APlayerCharacter : public AMyCharacter, public IRewindable, public IDilatable
 {
 	GENERATED_BODY()
 	
@@ -98,7 +99,11 @@ public:
 	virtual void IRewind_Implementation() override;
 	virtual void IRollback_Implementation() override;
 
+	virtual void ApplyDilationFactor_Implementation(float factor);
+	virtual void ClearTimeDilation_Implementation();
+
 protected:
+	float dilationFactor = 1.f;
 
 	//CAMERA COMPONENTS
 	UPROPERTY (EditAnywhere, Category = "Camera")

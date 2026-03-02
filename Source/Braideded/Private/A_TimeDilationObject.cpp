@@ -2,26 +2,51 @@
 
 
 #include "A_TimeDilationObject.h"
+#include "Kismet/GameplayStatics.h"
+#include "PlayerCharacter.h"
+#include "AC_TimeDilation.h"
 
 // Sets default values
 AA_TimeDilationObject::AA_TimeDilationObject()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-	MinRadiusCollider = CreateDefaultSubobject<USphereComponent>(TEXT("MinRadiusCollider"));
-	MinRadiusCollider->SetupAttachment(RootComponent);
-	MaxRadiusCollider->SetSphereRadius(TimeDilationMaxRadius);
+	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 
-	MaxRadiusCollider = CreateDefaultSubobject<USphereComponent>(TEXT("MaxRadiusCollider"));
-	MaxRadiusCollider->SetupAttachment(RootComponent);
-	MinRadiusCollider->SetSphereRadius(TimeDilationMinRadius);
+	PrimaryActorTick.bCanEverTick = true;
+	RadiusCollider = CreateDefaultSubobject<USphereComponent>(TEXT("RadiusCollider"));
+	RadiusCollider->SetupAttachment(RootComponent);
+	RadiusCollider->SetSphereRadius(TimeDilationRadius);
 }
 
 // Called when the game starts or when spawned
 void AA_TimeDilationObject::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("hello")));
+
+	AA_TimeDilationObject::Execute_SetActive(this, false);
+}
+
+void AA_TimeDilationObject::SetUpParameters(UAC_TimeDilation* TimeDilationAC, float Radius, float DilationFactor)
+{
+	//AActor* OutActor = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass());
+
+	//if (!OutActor) return;
+
+	//UAC_TimeDilation* TimeDilationAC = OutActor->FindComponentByClass<UAC_TimeDilation>();
+
+	//Binds overlap events to the functions of the TimeDilation Component
+	if (!TimeDilationAC)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("CAST TO TD FAILED")));
+		return;
+	}
+
+	RadiusCollider->OnComponentBeginOverlap.AddDynamic(TimeDilationAC, &UAC_TimeDilation::AddToAffectedActors);
+	RadiusCollider->OnComponentEndOverlap.AddDynamic(TimeDilationAC, &UAC_TimeDilation::RemoveFromAffectedActors);
+
+	TimeDilationRadius = Radius;
+	MaxTimeDilationFactor = DilationFactor;
 }
 
 // Called every frame
@@ -31,20 +56,13 @@ void AA_TimeDilationObject::Tick(float DeltaTime)
 
 }
 
-void AA_TimeDilationObject::CreateFormula()
+void AA_TimeDilationObject::SetActive_Implementation(bool IsActive)
 {
-	// Calculate the slope (m) and y-intercept (c) for a linear function that maps distance to time dilation factor
-	m = (MaxTimeDilationFactor - 1.f) / (TimeDilationMinRadius - TimeDilationMaxRadius);
-	c = (m * TimeDilationMaxRadius) - MaxTimeDilationFactor;
+	this->isActive = IsActive;
+	SetActorHiddenInGame(!IsActive);
 }
 
-//if player is in MinDistance collider, run this formula, if in MaxDistance collider, return max dilation factor, if outside of MaxDistance collider, return 1 (no dilation)
-float AA_TimeDilationObject::CalculateTimeDilationFactor(AActor* actor)
+bool AA_TimeDilationObject::IsActive_Implementation()
 {
-	// Calculate the time dilation factor based on the distance from the center of the object
-	float TimeDilation = 1.f;
-	float Distance = FVector::Dist(GetActorLocation(), actor->GetActorLocation());
-	TimeDilation = (m * Distance) + c;
-	
-	return TimeDilation;
+	return isActive;
 }

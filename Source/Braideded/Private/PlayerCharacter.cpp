@@ -102,7 +102,7 @@ void APlayerCharacter::Walk(const FInputActionValue& Value)
 
 	if (Value.Get<float>() > 0) 
 	{
-		AddMovementInput(FVector::ForwardVector, Value.Get<float>());
+		AddMovementInput(FVector::ForwardVector, Value.Get<float>() * dilationFactor);
 		FlipbookComponent->SetRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
 
 		if (!CharacterComponent->IsMovingOnGround()) return;
@@ -110,7 +110,7 @@ void APlayerCharacter::Walk(const FInputActionValue& Value)
 	}
 	else if (Value.Get<float>() < 0)
 	{
-		AddMovementInput(FVector::ForwardVector, Value.Get<float>());
+		AddMovementInput(FVector::ForwardVector, Value.Get<float>() * dilationFactor);
 		FlipbookComponent->SetRelativeRotation(FRotator(0.0f, 180.0f, 0.0f));
 
 		if (!CharacterComponent->IsMovingOnGround()) return;
@@ -167,6 +167,19 @@ void APlayerCharacter::ActivateAction1(const FInputActionValue& Value)
 void APlayerCharacter::ActivateAction2(const FInputActionValue& Value)
 {
 	// Implement action 2 behavior here
+	if (ActionObj2 == nullptr) return;
+
+
+	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
+	{
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+		{
+			Subsystem->RemoveMappingContext(DefaultMappingContext);
+			Subsystem->AddMappingContext(Ability2MappingContext, 0);
+		}
+	}
+
+	IAction::Execute_IActivate(ActionObj2, Value.Get<float>());
 }
 
 void APlayerCharacter::ActivateAction3(const FInputActionValue& Value)
@@ -195,7 +208,17 @@ void APlayerCharacter::FDeactivateAction1(const FInputActionValue& Value)
 
 void APlayerCharacter::FDeactivateAction2(const FInputActionValue& Value)
 {
-	// Implement action 2 deactivation behavior here
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Deactivating");
+	if (ActionObj2 == nullptr) return;
+
+	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
+	{
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+		{
+			Subsystem->RemoveMappingContext(Ability2MappingContext);
+			Subsystem->AddMappingContext(DefaultMappingContext, 0);
+		}
+	}
 }
 
 void APlayerCharacter::FDeactivateAction3(const FInputActionValue& Value)
@@ -264,6 +287,16 @@ void APlayerCharacter::IRollback_Implementation()
 	// Set objects in motion again
 }
 
+void APlayerCharacter::ApplyDilationFactor_Implementation(float factor) 
+{
+	dilationFactor = factor;
+}
+
+void APlayerCharacter::ClearTimeDilation_Implementation()
+{
+	dilationFactor = 1.f;
+}
+
 void APlayerCharacter::SetActions()
 {
 	if (Action1)
@@ -272,6 +305,20 @@ void APlayerCharacter::SetActions()
 		ActionComponent1->RegisterComponent();
 
 		ActionObj1 = Cast<UObject>(ActionComponent1);
+	}
+	if (Action2)
+	{
+		ActionComponent2 = NewObject<UActorComponent>(this, Action2);
+		ActionComponent2->RegisterComponent();
+
+		ActionObj2 = Cast<UObject>(ActionComponent2);
+	}
+	if (Action3)
+	{
+		ActionComponent3 = NewObject<UActorComponent>(this, Action3);
+		ActionComponent3->RegisterComponent();
+
+		ActionObj3 = Cast<UObject>(ActionComponent3);
 	}
 }
 

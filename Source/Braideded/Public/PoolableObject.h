@@ -4,32 +4,25 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
-#include "IAction.generated.h"
+#include "PoolableObject.generated.h"
 
 /**
  * 
  */
-
 UINTERFACE(MinimalAPI, BlueprintType, Blueprintable)
-class UAction : public UInterface
+class UPoolableObject : public UInterface
 {
 	GENERATED_BODY()
 };
 
-class IAction : public IInterface
+class IPoolableObject : public IInterface
 {
 	GENERATED_BODY()
 
 public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void IActivate(float Value);
+	void SetActive(bool isActive);
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void IDeactivate();
-
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void IRecord();
-
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void IClear();
+	bool IsActive();
 };

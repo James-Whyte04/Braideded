@@ -5,39 +5,40 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Components/SphereComponent.h"
+#include "PoolableObject.h"
 #include "A_TimeDilationObject.generated.h"
 
+class UAC_TimeDilation;
+
 UCLASS()
-class BRAIDEDED_API AA_TimeDilationObject : public AActor
+class BRAIDEDED_API AA_TimeDilationObject : public AActor, public IPoolableObject
 {
 	GENERATED_BODY()
 	
 public:	
 	AA_TimeDilationObject();
 
+	virtual void SetActive_Implementation(bool IsActive);
+	virtual bool IsActive_Implementation();
+	
+	void SetUpParameters(UAC_TimeDilation* TimeDilationAC, float Radius, float DilationFactor);
+
 protected:
 	virtual void BeginPlay() override;
 
 	//THESE VARIABLES WILL BE MOVED TO THE COMPONENT LATER, BUT FOR TESTING PURPOSES THEY ARE IN THE ACTOR FOR NOW
+	//REMOVE BEGIN PLAY TO A FUNCTION CALLED ON SPAWN
 
-	//max time dilation factor at the center of the object
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Time Dilation")
+	USphereComponent* RadiusCollider;
+
 	float MaxTimeDilationFactor = 0.5f;
-
-	//min and max radius for the time dilation effect, max is where the effect is strongest (max dilation applied), min is where its weakest (no dilation applied)
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Time Dilation")
-	float TimeDilationMaxRadius = 300.f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Time Dilation")
-	float TimeDilationMinRadius = 1000.f;
-
-	USphereComponent* MinRadiusCollider;
-	USphereComponent* MaxRadiusCollider;
+	float TimeDilationRadius = 100.f;
 
 private:
 	//function to create the formula for time dilation based on values set in the editor
 	void CreateFormula();
 	float CalculateTimeDilationFactor(AActor* actor);
+	bool isActive;
 
 	// Variables for the formula, (equation of a line)
 	float m, c;

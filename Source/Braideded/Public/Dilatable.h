@@ -4,32 +4,26 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
-#include "IAction.generated.h"
+#include "Dilatable.generated.h"
 
 /**
  * 
  */
-
 UINTERFACE(MinimalAPI, BlueprintType, Blueprintable)
-class UAction : public UInterface
+class UDilatable : public UInterface
 {
 	GENERATED_BODY()
 };
 
-class IAction : public IInterface
+class IDilatable : public IInterface
 {
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void IActivate(float Value);
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void IDeactivate();
+	void ApplyDilationFactor(float factor);
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void IRecord();
-
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void IClear();
+	void ClearTimeDilation();
 };

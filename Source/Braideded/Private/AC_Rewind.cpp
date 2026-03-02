@@ -31,7 +31,7 @@ void UAC_Rewind::BeginPlay()
 	// Array of actors
 	// Array of queue of their positions
 	TArray<AActor*> OutActors;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AActor::StaticClass(), OutActors);;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AActor::StaticClass(), OutActors);
 
 	if (OutActors.Num() == 0) return;
 
@@ -70,8 +70,7 @@ void UAC_Rewind::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompo
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	if (!canRecord) return;
 	UAC_Rewind::Execute_IRecord(this);
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "recording");
-
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "recording");
 }
 
 
@@ -157,7 +156,7 @@ void UAC_Rewind::IRecord_Implementation()
 		}
 		ActorsStates[i].Add(Char);
 		
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, Char.CharacterPosition.ToString());
+		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, Char.CharacterPosition.ToString());
 	}
 }
 
@@ -179,21 +178,4 @@ void UAC_Rewind::IClear_Implementation()
 	}
 
 	ActorsStates.Empty();
-}
-
-
-
-
-float UAC_Rewind::ITimeScale_Implementation()
-{
-	if (isRewinding) 
-	{
-		timeScale = -1.f;
-		return timeScale;
-	}
-	else
-	{
-		timeScale = 1.f;
-		return timeScale;
-	}
 }
