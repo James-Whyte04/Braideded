@@ -96,8 +96,6 @@ public:
 	virtual void ISetCharacterSnapshot_Implementation(FCharacterData CharData) override;
 	virtual void IEnterRewindState_Implementation() override;
 	virtual void IExitRewindState_Implementation(FCharacterData CharData) override;
-	virtual void IRewind_Implementation() override;
-	virtual void IRollback_Implementation() override;
 
 	virtual void ApplyDilationFactor_Implementation(float factor);
 	virtual void ClearTimeDilation_Implementation();

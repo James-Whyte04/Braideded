@@ -29,12 +29,6 @@ void AA_TimeDilationObject::BeginPlay()
 
 void AA_TimeDilationObject::SetUpParameters(UAC_TimeDilation* TimeDilationAC, float Radius, float DilationFactor)
 {
-	//AActor* OutActor = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass());
-
-	//if (!OutActor) return;
-
-	//UAC_TimeDilation* TimeDilationAC = OutActor->FindComponentByClass<UAC_TimeDilation>();
-
 	//Binds overlap events to the functions of the TimeDilation Component
 	if (!TimeDilationAC)
 	{
@@ -53,8 +47,13 @@ void AA_TimeDilationObject::SetUpParameters(UAC_TimeDilation* TimeDilationAC, fl
 void AA_TimeDilationObject::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
+
+
+
+/// <summary>
+/// OBJECT POOLING FUNCTIONS
+/// </summary>
 
 void AA_TimeDilationObject::SetActive_Implementation(bool IsActive)
 {

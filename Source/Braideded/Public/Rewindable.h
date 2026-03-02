@@ -32,10 +32,4 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void IExitRewindState(FCharacterData CharData);
-
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void IRewind();
-
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void IRollback();
 };

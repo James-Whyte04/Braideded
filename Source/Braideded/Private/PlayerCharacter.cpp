@@ -38,9 +38,9 @@ APlayerCharacter::APlayerCharacter()
 
 
 
-
-
-// DEFAULT UE FUNCTIONS
+/// <summary>
+/// DEFAULT UE FUNCTIONS
+/// </summary>
 
 void APlayerCharacter::BeginPlay()
 {
@@ -59,6 +59,11 @@ void APlayerCharacter::BeginPlay()
 	isGrounded = true;
 }
 
+void APlayerCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	ClearActions();
+}
 
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -83,9 +88,9 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 
 
-
-
-// MOVEMENT FUNCTIONS
+/// <summary>
+/// MOVEMENT FUNCTIONS
+/// </summary>
 
 void APlayerCharacter::StopWalk(const FInputActionValue& Value) 
 {
@@ -102,7 +107,7 @@ void APlayerCharacter::Walk(const FInputActionValue& Value)
 
 	if (Value.Get<float>() > 0) 
 	{
-		AddMovementInput(FVector::ForwardVector, Value.Get<float>() * dilationFactor);
+		AddMovementInput(FVector::ForwardVector, Value.Get<float>());
 		FlipbookComponent->SetRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
 
 		if (!CharacterComponent->IsMovingOnGround()) return;
@@ -110,7 +115,7 @@ void APlayerCharacter::Walk(const FInputActionValue& Value)
 	}
 	else if (Value.Get<float>() < 0)
 	{
-		AddMovementInput(FVector::ForwardVector, Value.Get<float>() * dilationFactor);
+		AddMovementInput(FVector::ForwardVector, Value.Get<float>());
 		FlipbookComponent->SetRelativeRotation(FRotator(0.0f, 180.0f, 0.0f));
 
 		if (!CharacterComponent->IsMovingOnGround()) return;
@@ -143,9 +148,11 @@ void APlayerCharacter::Landed(const FHitResult& Hit)
 
 
 
-
-
-//ABILITY ACTIVATE FUNCTIONS
+/// <summary>
+/// ABILITY FUNCTIONS
+/// </summary>
+ 
+//ACTIVATE
 void APlayerCharacter::ActivateAction1(const FInputActionValue& Value)
 {
 	// Implement action 1 behavior here
@@ -166,7 +173,7 @@ void APlayerCharacter::ActivateAction1(const FInputActionValue& Value)
 
 void APlayerCharacter::ActivateAction2(const FInputActionValue& Value)
 {
-	// Implement action 2 behavior here
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Activating Ability 2");
 	if (ActionObj2 == nullptr) return;
 
 
@@ -188,10 +195,10 @@ void APlayerCharacter::ActivateAction3(const FInputActionValue& Value)
 }
 
 
-//ABILITY DEACTIVATE FUNCTIONS
+
+//DEACTIVATE
 void APlayerCharacter::FDeactivateAction1(const FInputActionValue& Value)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Deactivating");
 	if (ActionObj1 == nullptr) return;
 
 	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
@@ -219,6 +226,8 @@ void APlayerCharacter::FDeactivateAction2(const FInputActionValue& Value)
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
+
+	IAction::Execute_IDeactivate(ActionObj2);
 }
 
 void APlayerCharacter::FDeactivateAction3(const FInputActionValue& Value)
@@ -228,7 +237,10 @@ void APlayerCharacter::FDeactivateAction3(const FInputActionValue& Value)
 
 
 
-// REWIND INTERFACE FUNCTIONS
+/// <summary>
+/// REWIND INTERFACE FUNCTIONS
+/// </summary>
+
 FCharacterData APlayerCharacter::IGetCharacterSnapshot_Implementation() 
 {
 	float PlaybackTime = FlipbookComponent->GetPlaybackPosition();
@@ -275,27 +287,27 @@ void APlayerCharacter::IExitRewindState_Implementation(FCharacterData CharData)
 	GetSprite()->SetPlaybackPositionInFrames(CharData.FlipbookFrame, false);
 }
 
-void APlayerCharacter::IRewind_Implementation() 
-{
-	// Set world time to -1
-	// Restore positions of rewindable objects
-}
 
-void APlayerCharacter::IRollback_Implementation() 
-{
-	// Set world time to 1
-	// Set objects in motion again
-}
+
+/// <summary>
+/// TIME DILATION INTERFACE FUNCTIONS
+/// </summary>
 
 void APlayerCharacter::ApplyDilationFactor_Implementation(float factor) 
 {
-	dilationFactor = factor;
+	this->CustomTimeDilation = factor;
 }
 
 void APlayerCharacter::ClearTimeDilation_Implementation()
 {
-	dilationFactor = 1.f;
+	this->CustomTimeDilation = 1.f;
 }
+
+
+
+/// <summary>
+/// ACTION RELATED FUNCTIONS
+/// </summary>
 
 void APlayerCharacter::SetActions()
 {
@@ -343,10 +355,4 @@ void APlayerCharacter::ClearActions()
 		ActionComponent3 = nullptr;
 		ActionObj3 = nullptr;
 	}
-}
-
-void APlayerCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
-{
-	Super::EndPlay(EndPlayReason);
-	ClearActions();
 }

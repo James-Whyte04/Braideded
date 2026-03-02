@@ -74,12 +74,8 @@ void UAC_TimeDilation::IDeactivate_Implementation()
 {
 	if (!TimeDilationActor) return;
 
-	//set time dilation actor to inactive
-	AA_TimeDilationObject::Execute_SetActive(TimeDilationActor, false);
-	TimeDilationActor->SetActorLocation(FVector(0.f, 0.f, 0.f));
-
 	//clear the time dilation of all affected actors
-	if (AffectedActors.Num() > 0) 
+	if (AffectedActors.Num() > 0)
 	{
 		for (AActor* actor : AffectedActors)
 		{
@@ -89,6 +85,10 @@ void UAC_TimeDilation::IDeactivate_Implementation()
 			}
 		}
 	}
+
+	//set time dilation actor to inactive
+	AA_TimeDilationObject::Execute_SetActive(TimeDilationActor, false);
+	TimeDilationActor->SetActorLocation(FVector(0.f, 0.f, 0.f));
 }
 
 void UAC_TimeDilation::IRecord_Implementation()
