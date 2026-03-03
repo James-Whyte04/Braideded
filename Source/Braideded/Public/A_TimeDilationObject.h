@@ -31,8 +31,8 @@ protected:
 
 	USphereComponent* RadiusCollider;
 
-	float MaxTimeDilationFactor = 0.5f;
-	float TimeDilationRadius = 100.f;
+	float MaxTimeDilationFactor;
+	float TimeDilationRadius;
 
 private:
 	//function to create the formula for time dilation based on values set in the editor

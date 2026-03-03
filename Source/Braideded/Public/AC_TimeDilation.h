@@ -44,10 +44,10 @@ protected:
 	//min and max radius for the time dilation effect, max is where the effect is strongest (max dilation applied), min is where its weakest (no dilation applied)
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Time Dilation")
-	float TimeDilationRadius = 150.f;
+	float TimeDilationRadius = 500.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Time Dilation")
-	float TimeDilationMaxRadius = 50.f;
+	float TimeDilationMaxRadius = 150.f;
 
 	UFUNCTION(BlueprintCallable, Category = "Time Dilation")
 	void CreateFormula();

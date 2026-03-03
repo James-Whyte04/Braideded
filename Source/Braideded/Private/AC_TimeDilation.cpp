@@ -102,6 +102,8 @@ void UAC_TimeDilation::IRecord_Implementation()
 		{
 			float TimeDilationFactor = CalculateTimeDilationFactor(actor);
 			IDilatable::Execute_ApplyDilationFactor(actor, TimeDilationFactor);
+			FString FloatStr = FString::SanitizeFloat(TimeDilationFactor);
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, *FloatStr);
 		}
 	}
 }
@@ -127,13 +129,19 @@ float UAC_TimeDilation::CalculateTimeDilationFactor(AActor* actor)
 
 	float TimeDilationFactor = 1.f;
 	float Distance = FVector::Dist(TimeDilationActor->GetActorLocation(), actor->GetActorLocation());
+	FString Dist = FString::SanitizeFloat(Distance);
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, *Dist);
+
 	TimeDilationFactor = (m * Distance) + c;
 
 	if (TimeDilationFactor < MaxTimeDilationFactor) 
 	{
 		return MaxTimeDilationFactor;
 	}
-	
+	else if (TimeDilationFactor > 1.f)
+	{
+		return 1.f;
+	}
 	return TimeDilationFactor;
 }
 

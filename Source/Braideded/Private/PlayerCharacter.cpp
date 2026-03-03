@@ -250,7 +250,7 @@ FCharacterData APlayerCharacter::IGetCharacterSnapshot_Implementation()
 		GetVelocity(),
 		FlipbookComponent->GetFlipbook(),
 		FlipbookComponent->GetFlipbook()->GetKeyFrameIndexAtTime(PlaybackTime),
-		GetCharacterMovement()->MovementMode);
+		CharacterComponent->MovementMode);
 	return Char;
 }
 
@@ -265,26 +265,48 @@ void APlayerCharacter::ISetCharacterSnapshot_Implementation(FCharacterData CharD
 
 void APlayerCharacter::IEnterRewindState_Implementation() 
 {
-	GetCharacterMovement()->DisableMovement();
+	CharacterComponent->DisableMovement();
 	FlipbookComponent->Stop();
 }
 
 void APlayerCharacter::IExitRewindState_Implementation(FCharacterData CharData)
 {
 	//Set movement mode
-	GetCharacterMovement()->SetMovementMode(CharData.MovementMode);
+	CharacterComponent->SetMovementMode(CharData.MovementMode);
 
 	//Set position and rotation
 	SetActorLocation(CharData.CharacterPosition);
 	FlipbookComponent->SetRelativeRotation(CharData.CharacterRotation);
 
 	//Set velocity
-	GetCharacterMovement()->Velocity = CharData.Velocity;
+	CharacterComponent->Velocity = CharData.Velocity;
 
 	//Set flipbook and frame
 	FlipbookComponent->Play();
-	GetSprite()->SetFlipbook(CharData.Flipbook);
-	GetSprite()->SetPlaybackPositionInFrames(CharData.FlipbookFrame, false);
+
+	switch (CharacterComponent->MovementMode)
+	{
+	case MOVE_Falling:
+		FlipbookComponent->SetFlipbook(JumpFlipbook);
+		FlipbookComponent->SetPlaybackPositionInFrames(CharData.FlipbookFrame, false);
+		break;
+	case MOVE_Walking:
+		if (CharacterComponent->GetCurrentAcceleration().X == 0) 
+		{
+			FlipbookComponent->SetFlipbook(IdleFlipbook);
+		}
+		else
+		{
+			FlipbookComponent->SetFlipbook(WalkFlipbook);
+		}
+
+		FlipbookComponent->SetPlaybackPositionInFrames(CharData.FlipbookFrame, false);
+		break;
+	default:
+		FlipbookComponent->SetFlipbook(IdleFlipbook);
+		FlipbookComponent->SetPlaybackPositionInFrames(CharData.FlipbookFrame, false);
+		break;
+	}
 }
 
 

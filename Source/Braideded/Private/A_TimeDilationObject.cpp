@@ -23,8 +23,6 @@ void AA_TimeDilationObject::BeginPlay()
 {
 	Super::BeginPlay();
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("hello")));
-
-	AA_TimeDilationObject::Execute_SetActive(this, false);
 }
 
 void AA_TimeDilationObject::SetUpParameters(UAC_TimeDilation* TimeDilationAC, float Radius, float DilationFactor)
@@ -41,6 +39,9 @@ void AA_TimeDilationObject::SetUpParameters(UAC_TimeDilation* TimeDilationAC, fl
 
 	TimeDilationRadius = Radius;
 	MaxTimeDilationFactor = DilationFactor;
+
+	RadiusCollider->SetSphereRadius(TimeDilationRadius);
+	AA_TimeDilationObject::Execute_SetActive(this, false);
 }
 
 // Called every frame
