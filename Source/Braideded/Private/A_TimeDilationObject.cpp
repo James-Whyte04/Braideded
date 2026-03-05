@@ -6,6 +6,11 @@
 #include "PlayerCharacter.h"
 #include "AC_TimeDilation.h"
 
+#include "EnhancedInputSubsystems.h"
+#include "EnhancedInputComponent.h"
+#include "InputMappingContext.h"
+#include "Engine/LocalPlayer.h"
+
 // Sets default values
 AA_TimeDilationObject::AA_TimeDilationObject()
 {
@@ -16,6 +21,10 @@ AA_TimeDilationObject::AA_TimeDilationObject()
 	RadiusCollider = CreateDefaultSubobject<USphereComponent>(TEXT("RadiusCollider"));
 	RadiusCollider->SetupAttachment(RootComponent);
 	RadiusCollider->SetSphereRadius(TimeDilationRadius);
+
+	FlipbookComponent = CreateDefaultSubobject<UPaperFlipbookComponent>(TEXT("Flipbook"));
+	FlipbookComponent->SetupAttachment(RadiusCollider);
+	FlipbookComponent->SetFlipbook(Flipbook);
 }
 
 // Called when the game starts or when spawned
@@ -65,4 +74,68 @@ void AA_TimeDilationObject::SetActive_Implementation(bool IsActive)
 bool AA_TimeDilationObject::IsActive_Implementation()
 {
 	return isActive;
+}
+
+
+
+/// <summary>
+/// REWIND INTERFACE FUNCTIONS
+/// </summary>
+
+FCharacterData AA_TimeDilationObject::IGetCharacterSnapshot_Implementation()
+{
+	float PlaybackTime = FlipbookComponent->GetPlaybackPosition();
+
+	FCharacterData object = FCharacterData(GetActorLocation(),
+		GetActorRotation(),
+		FVector(0.f, 0.f, 0.f),
+		FlipbookComponent->GetFlipbook(),
+		FlipbookComponent->GetFlipbook()->GetKeyFrameIndexAtTime(PlaybackTime),
+		MOVE_None,
+		isActive);
+
+	return object;
+}
+
+void AA_TimeDilationObject::ISetCharacterSnapshot_Implementation(FCharacterData CharData)
+{
+	SetActorLocation(CharData.CharacterPosition);
+	SetActorRotation(CharData.CharacterRotation);
+	FlipbookComponent->SetFlipbook(CharData.Flipbook);
+	FlipbookComponent->SetPlaybackPosition(CharData.FlipbookFrame, true);
+	AA_TimeDilationObject::Execute_SetActive(this, CharData.IsActive);
+}
+
+void AA_TimeDilationObject::IEnterRewindState_Implementation()
+{
+
+}
+
+void AA_TimeDilationObject::IExitRewindState_Implementation(FCharacterData CharData)
+{
+	if (!isActive) return;
+	AActor* actor = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerController::StaticClass());
+	
+	if (!actor) return;
+
+	if (APlayerController* PlayerController = Cast<APlayerController>(actor))
+	{
+		UInputMappingContext* IMC = LoadObject<UInputMappingContext>(nullptr, TEXT("/Game/Input/InputMappingContext/IMC_TimeDilation.IMC_TimeDilation"));
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+		{
+			Subsystem->ClearAllMappings();
+			Subsystem->AddMappingContext(IMC, 0);
+
+			PlayerController = nullptr;
+			delete PlayerController;
+
+			Subsystem = nullptr;
+			delete Subsystem;
+
+			IMC = nullptr;
+			delete IMC;
+		}
+	}
+	actor = nullptr;
+	delete actor;
 }

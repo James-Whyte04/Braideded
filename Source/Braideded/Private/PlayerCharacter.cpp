@@ -250,7 +250,8 @@ FCharacterData APlayerCharacter::IGetCharacterSnapshot_Implementation()
 		GetVelocity(),
 		FlipbookComponent->GetFlipbook(),
 		FlipbookComponent->GetFlipbook()->GetKeyFrameIndexAtTime(PlaybackTime),
-		CharacterComponent->MovementMode);
+		CharacterComponent->MovementMode,
+		isActive);
 	return Char;
 }
 

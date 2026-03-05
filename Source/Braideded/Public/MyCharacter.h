@@ -46,4 +46,5 @@ protected:
 	UPaperFlipbookComponent* FlipbookComponent;
 	UCharacterMovementComponent* CharacterComponent;
 	bool isGrounded;
+	bool isActive;
 };

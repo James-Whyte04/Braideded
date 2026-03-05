@@ -34,10 +34,11 @@ public:
 		Flipbook = nullptr;
 		FlipbookFrame = 0;
 		MovementMode = EMovementMode::MOVE_None;
+		IsActive = false;
 	}
 
 	// Constuctor
-	FCharacterData(FVector CharPos, FRotator CharRot, FVector Vel, UPaperFlipbook *Flipbook, int AnimState, TEnumAsByte<EMovementMode> Movement)
+	FCharacterData(FVector CharPos, FRotator CharRot, FVector Vel, UPaperFlipbook *Flipbook, int AnimState, TEnumAsByte<EMovementMode> Movement, bool IsActive)
 	{
 		CharacterPosition = CharPos;
 		CharacterRotation = CharRot;
@@ -45,6 +46,7 @@ public:
 		this->Flipbook = Flipbook;
 		FlipbookFrame = AnimState;
 		MovementMode = Movement;
+		this->IsActive = IsActive;
 	}
 
 	// Variables
@@ -66,6 +68,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character Data")
 	TEnumAsByte<EMovementMode> MovementMode;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character Data")
+	bool IsActive;
+
 
 	// Operators
 	FCharacterData& operator=(const FCharacterData& CD) 
@@ -76,6 +81,7 @@ public:
 		Flipbook = CD.Flipbook;
 		FlipbookFrame = CD.FlipbookFrame;
 		MovementMode = CD.MovementMode;
+		IsActive = CD.IsActive;
 
 		return *this;
 	}

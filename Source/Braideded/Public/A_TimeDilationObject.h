@@ -6,12 +6,14 @@
 #include "GameFramework/Actor.h"
 #include "Components/SphereComponent.h"
 #include "PoolableObject.h"
+#include "Rewindable.h"
+#include "CharacterData.h"
 #include "A_TimeDilationObject.generated.h"
 
 class UAC_TimeDilation;
 
 UCLASS()
-class BRAIDEDED_API AA_TimeDilationObject : public AActor, public IPoolableObject
+class BRAIDEDED_API AA_TimeDilationObject : public AActor, public IPoolableObject, public IRewindable
 {
 	GENERATED_BODY()
 	
@@ -23,11 +25,23 @@ public:
 	
 	void SetUpParameters(UAC_TimeDilation* TimeDilationAC, float Radius, float DilationFactor);
 
+	//REWIND INTERFACE FUNCTIONS
+	virtual FCharacterData IGetCharacterSnapshot_Implementation() override;
+	virtual void ISetCharacterSnapshot_Implementation(FCharacterData CharData) override;
+	virtual void IEnterRewindState_Implementation() override;
+	virtual void IExitRewindState_Implementation(FCharacterData CharData) override;
+
 protected:
 	virtual void BeginPlay() override;
 
 	//THESE VARIABLES WILL BE MOVED TO THE COMPONENT LATER, BUT FOR TESTING PURPOSES THEY ARE IN THE ACTOR FOR NOW
 	//REMOVE BEGIN PLAY TO A FUNCTION CALLED ON SPAWN
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Flipbook")
+	UPaperFlipbook* Flipbook;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Flipbook")
+	UPaperFlipbookComponent* FlipbookComponent;
 
 	USphereComponent* RadiusCollider;
 

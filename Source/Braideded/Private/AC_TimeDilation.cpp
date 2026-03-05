@@ -150,6 +150,7 @@ void UAC_TimeDilation::AddToAffectedActors(UPrimitiveComponent* OverlappedComp, 
 	if (OtherActor->GetClass()->ImplementsInterface(UDilatable::StaticClass()) && !AffectedActors.Contains(OtherActor))
 	{
 		AffectedActors.Add(OtherActor);
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Actor is in zone"));
 	}
 }
 
@@ -158,5 +159,7 @@ void UAC_TimeDilation::RemoveFromAffectedActors(UPrimitiveComponent* OverlappedC
 	if (OtherActor->GetClass()->ImplementsInterface(UDilatable::StaticClass()) && AffectedActors.Contains(OtherActor))
 	{
 		AffectedActors.Remove(OtherActor);
+		IDilatable::Execute_ClearTimeDilation(OtherActor);
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Actor has left zone"));
 	}
 }
