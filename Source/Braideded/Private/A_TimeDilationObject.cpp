@@ -65,10 +65,10 @@ void AA_TimeDilationObject::Tick(float DeltaTime)
 /// OBJECT POOLING FUNCTIONS
 /// </summary>
 
-void AA_TimeDilationObject::SetActive_Implementation(bool IsActive)
+void AA_TimeDilationObject::SetActive_Implementation(bool Active)
 {
-	this->isActive = IsActive;
-	SetActorHiddenInGame(!IsActive);
+	isActive = Active;
+	SetActorHiddenInGame(!Active);
 }
 
 bool AA_TimeDilationObject::IsActive_Implementation()

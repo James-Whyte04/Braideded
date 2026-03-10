@@ -6,13 +6,18 @@
 #include "PaperCharacter.h"
 #include "PaperFlipbookComponent.h"
 #include "PaperFlipbook.h"
+#include "PoolableObject.h"
+#include "PaperTileMap.h"
+#include "PaperTileMapComponent.h"
 #include "MyCharacter.generated.h"
 
 /**
  * 
  */
+
+
 UCLASS()
-class BRAIDEDED_API AMyCharacter : public APaperCharacter
+class BRAIDEDED_API AMyCharacter : public APaperCharacter, public IPoolableObject
 {
 	GENERATED_BODY()
 	
@@ -29,6 +34,10 @@ public:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	virtual void Landed(const FHitResult& Hit) override;
+	virtual void Death();
+
+	virtual void SetActive_Implementation(bool Active) override;
+	virtual bool IsActive_Implementation() override;
 
 
 	//FLIPBOOKS
@@ -42,6 +51,9 @@ public:
 	UPaperFlipbook* JumpFlipbook;
 
 protected:
+
+	UFUNCTION()
+	void OnSpikeCollision(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
 	UPaperFlipbookComponent* FlipbookComponent;
 	UCharacterMovementComponent* CharacterComponent;

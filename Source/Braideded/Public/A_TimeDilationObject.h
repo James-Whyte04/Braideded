@@ -20,7 +20,7 @@ class BRAIDEDED_API AA_TimeDilationObject : public AActor, public IPoolableObjec
 public:	
 	AA_TimeDilationObject();
 
-	virtual void SetActive_Implementation(bool IsActive);
+	virtual void SetActive_Implementation(bool Active);
 	virtual bool IsActive_Implementation();
 	
 	void SetUpParameters(UAC_TimeDilation* TimeDilationAC, float Radius, float DilationFactor);

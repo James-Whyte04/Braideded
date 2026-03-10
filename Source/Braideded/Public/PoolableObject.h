@@ -21,7 +21,7 @@ class IPoolableObject : public IInterface
 
 public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void SetActive(bool isActive);
+	void SetActive(bool Active);
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	bool IsActive();
