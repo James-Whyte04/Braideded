@@ -29,11 +29,12 @@ APlayerCharacter::APlayerCharacter()
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
 	CameraComponent->SetupAttachment(SpringArmComponent, USpringArmComponent::SocketName);
 	CameraComponent->bUsePawnControlRotation = false;
-	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
-	GetCharacterMovement()->bOrientRotationToMovement = false;
 
 	FlipbookComponent = GetSprite();
 	CharacterComponent = GetCharacterMovement();
+
+	CharacterComponent->MaxWalkSpeed = WalkSpeed;
+	CharacterComponent->bOrientRotationToMovement = false;
 }
 
 
@@ -78,11 +79,9 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 		EIC->BindAction(IAction1, ETriggerEvent::Triggered, this, &APlayerCharacter::ActivateAction1);
 		EIC->BindAction(IAction2, ETriggerEvent::Triggered, this, &APlayerCharacter::ActivateAction2);
-		EIC->BindAction(IAction3, ETriggerEvent::Triggered, this, &APlayerCharacter::ActivateAction3);
 
 		EIC->BindAction(IDeactivateAction1, ETriggerEvent::Triggered, this, &APlayerCharacter::FDeactivateAction1);
 		EIC->BindAction(IDeactivateAction2, ETriggerEvent::Triggered, this, &APlayerCharacter::FDeactivateAction2);
-		EIC->BindAction(IDeactivateAction3, ETriggerEvent::Triggered, this, &APlayerCharacter::FDeactivateAction3);
 	}
 }
 
@@ -189,11 +188,6 @@ void APlayerCharacter::ActivateAction2(const FInputActionValue& Value)
 	IAction::Execute_IActivate(ActionObj2, Value.Get<float>());
 }
 
-void APlayerCharacter::ActivateAction3(const FInputActionValue& Value)
-{
-	// Implement action 3 behavior here
-}
-
 
 
 //DEACTIVATE
@@ -228,11 +222,6 @@ void APlayerCharacter::FDeactivateAction2(const FInputActionValue& Value)
 	}
 
 	IAction::Execute_IDeactivate(ActionObj2);
-}
-
-void APlayerCharacter::FDeactivateAction3(const FInputActionValue& Value)
-{
-	// Implement action 3 deactivation behavior here
 }
 
 

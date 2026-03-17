@@ -155,8 +155,6 @@ void UAC_Rewind::IRecord_Implementation()
 			ActorsStates[i].RemoveAt(0);
 		}
 		ActorsStates[i].Add(Char);
-		
-		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, Char.CharacterPosition.ToString());
 	}
 }
 

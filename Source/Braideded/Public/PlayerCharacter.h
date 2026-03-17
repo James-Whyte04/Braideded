@@ -66,16 +66,10 @@ public:
 	UInputAction* IAction2;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
-	UInputAction* IAction3;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputAction* IDeactivateAction1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputAction* IDeactivateAction2;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
-	UInputAction* IDeactivateAction3;
 
 
 
@@ -86,9 +80,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Flipbook")
 	UPaperFlipbook* Action2Flipbook;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Flipbook")
-	UPaperFlipbook* Action3Flipbook;
 
 
 	//REWIND INTERFACE FUNCTIONS
@@ -138,10 +129,8 @@ protected:
 	//ACTION FUNCTIONS
 	void ActivateAction1(const FInputActionValue& Value);
 	void ActivateAction2(const FInputActionValue& Value);
-	void ActivateAction3(const FInputActionValue& Value);
 	void FDeactivateAction1(const FInputActionValue& Value);
 	void FDeactivateAction2(const FInputActionValue& Value);
-	void FDeactivateAction3(const FInputActionValue& Value);
 
 	void SetActions();
 	void ClearActions();

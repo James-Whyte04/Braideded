@@ -16,10 +16,18 @@ AMyCharacter::AMyCharacter()
 	CharacterComponent = GetCharacterMovement();
 }
 
+
+
+//DEFAULT FUNCTIONS
 void AMyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	//Hook up OnSpikeCollision to OnComponentHit
 	GetCapsuleComponent()->OnComponentHit.AddDynamic(this, &AMyCharacter::OnSpikeCollision);
+	GetCapsuleComponent()->BodyInstance.bLockYTranslation = true; // Lock Y Location
+	GetCapsuleComponent()->BodyInstance.bLockXRotation = true;    // Lock X Rotation
+	GetCapsuleComponent()->BodyInstance.bLockZRotation = true;	 // Lock Z Rotation
 }
 
 void AMyCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -32,6 +40,9 @@ void AMyCharacter::Landed(const FHitResult& Hit)
 	Super::Landed(Hit);
 }
 
+
+
+//POOLABLE INTERFACE FUNCTIONS
 void AMyCharacter::SetActive_Implementation(bool Active)
 {
 	isActive = Active;
@@ -43,13 +54,30 @@ bool AMyCharacter::IsActive_Implementation()
 	return isActive;
 }
 
+
+
+//COLLISION FUNCTIONS
+void AMyCharacter::EnableCollision()
+{
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+}
+
+void AMyCharacter::DisableCollision()
+{
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+
+void AMyCharacter::Death()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Dead");
+}
+
 void AMyCharacter::OnSpikeCollision(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
 	//Checks if the hit component is a TileMapActor
 	APaperTileMapActor* Map = Cast<APaperTileMapActor>(Hit.GetActor());
 	if (!Map)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Failed");
 		return;
 	}
 
@@ -100,9 +128,4 @@ void AMyCharacter::OnSpikeCollision(UPrimitiveComponent* HitComp, AActor* OtherA
 		//Else ignore
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Not spikes");
 	}
-}
-
-void AMyCharacter::Death()
-{
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Dead");
 }

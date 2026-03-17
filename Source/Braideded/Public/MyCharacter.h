@@ -15,6 +15,12 @@
  * 
  */
 
+#define DELAY(time, block)\
+{\
+FTimerHandle TimerHandle;\
+GetWorld()->GetTimerManager().SetTimer(TimerHandle, [&]()block, time, false);\
+}
+
 
 UCLASS()
 class BRAIDEDED_API AMyCharacter : public APaperCharacter, public IPoolableObject
@@ -50,10 +56,18 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Flipbook")
 	UPaperFlipbook* JumpFlipbook;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Flipbook")
+	UPaperFlipbook* FallFlipbook;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Flipbook")
+	UPaperFlipbook* DeathFlipbook;
 protected:
 
 	UFUNCTION()
 	void OnSpikeCollision(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+
+	virtual void EnableCollision();
+	virtual void DisableCollision();
 
 	UPaperFlipbookComponent* FlipbookComponent;
 	UCharacterMovementComponent* CharacterComponent;
