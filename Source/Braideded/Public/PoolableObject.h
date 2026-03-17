@@ -25,4 +25,10 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	bool IsActive();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void Despawn();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void Spawn(FVector SpawnPoint, FRotator SpawnRotation);
 };

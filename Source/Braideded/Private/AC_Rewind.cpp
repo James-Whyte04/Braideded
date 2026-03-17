@@ -6,6 +6,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Containers/Queue.h"
 #include "Containers/CircularBuffer.h"
+#include "PlayerCharacter.h"
 
 
 UAC_Rewind::UAC_Rewind()
@@ -116,6 +117,11 @@ void UAC_Rewind::IActivate_Implementation(float Value)
 
 void UAC_Rewind::IDeactivate_Implementation()
 {
+	// Return if player is dead
+	APlayerCharacter* Player = Cast<APlayerCharacter>(GetOwner());
+
+	if (Player && Player->IsDead()) return;
+
 	// Set world time to 1
 	// Set objects in motion again
 

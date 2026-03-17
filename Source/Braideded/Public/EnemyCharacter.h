@@ -25,7 +25,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void Death() override;
 	virtual void Move(float DeltaTime);
-	
+
 	void ChangeDirection();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")

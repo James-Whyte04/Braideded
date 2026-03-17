@@ -44,6 +44,8 @@ public:
 
 	virtual void SetActive_Implementation(bool Active) override;
 	virtual bool IsActive_Implementation() override;
+	virtual void Spawn_Implementation(FVector SpawnPoint, FRotator SpawnRotation) override;
+	virtual void Despawn_Implementation() override;
 
 
 	//FLIPBOOKS
@@ -72,5 +74,6 @@ protected:
 	UPaperFlipbookComponent* FlipbookComponent;
 	UCharacterMovementComponent* CharacterComponent;
 	bool isGrounded;
-	bool isActive;
+	bool isVisible;
+	bool isDead;
 };

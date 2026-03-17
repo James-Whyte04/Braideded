@@ -240,7 +240,8 @@ FCharacterData APlayerCharacter::IGetCharacterSnapshot_Implementation()
 		FlipbookComponent->GetFlipbook(),
 		FlipbookComponent->GetFlipbook()->GetKeyFrameIndexAtTime(PlaybackTime),
 		CharacterComponent->MovementMode,
-		isActive);
+		isVisible,
+		isDead);
 	return Char;
 }
 
@@ -251,6 +252,7 @@ void APlayerCharacter::ISetCharacterSnapshot_Implementation(FCharacterData CharD
 	FlipbookComponent->SetRelativeRotation(CharData.CharacterRotation);
 	FlipbookComponent->SetFlipbook(CharData.Flipbook);
 	FlipbookComponent->SetPlaybackPosition(CharData.FlipbookFrame, true);
+	isDead = CharData.IsDead;
 }
 
 void APlayerCharacter::IEnterRewindState_Implementation() 
@@ -367,4 +369,11 @@ void APlayerCharacter::ClearActions()
 		ActionComponent3 = nullptr;
 		ActionObj3 = nullptr;
 	}
+}
+
+
+
+bool APlayerCharacter::IsDead()
+{
+	return isDead;
 }

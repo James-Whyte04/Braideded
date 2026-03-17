@@ -43,7 +43,7 @@ void ASpawner::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Running Spawn Logic");
-	DELAY(1.f,
+	DELAY(SpawnDelay,
 		{ Spawn(); });
 
 }
@@ -54,8 +54,7 @@ void ASpawner::Spawn()
 	{
 		if (!IPoolableObject::Execute_IsActive(actor))
 		{
-			DELAY(SpawnDelay,
-				{ IPoolableObject::Execute_SetActive(actor, false); });
+			IPoolableObject::Execute_Spawn(actor, SpawnPoint->GetComponentLocation(), SpawnRotation);
 			break;
 		}
 		else

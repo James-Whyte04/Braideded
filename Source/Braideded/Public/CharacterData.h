@@ -34,11 +34,12 @@ public:
 		Flipbook = nullptr;
 		FlipbookFrame = 0;
 		MovementMode = EMovementMode::MOVE_None;
-		IsActive = false;
+		IsVisible = false;
+		IsDead = true;
 	}
 
 	// Constuctor
-	FCharacterData(FVector CharPos, FRotator CharRot, FVector Vel, UPaperFlipbook *Flipbook, int AnimState, TEnumAsByte<EMovementMode> Movement, bool IsActive)
+	FCharacterData(FVector CharPos, FRotator CharRot, FVector Vel, UPaperFlipbook *Flipbook, int AnimState, TEnumAsByte<EMovementMode> Movement, bool IsVisible, bool IsDead = false)
 	{
 		CharacterPosition = CharPos;
 		CharacterRotation = CharRot;
@@ -46,7 +47,8 @@ public:
 		this->Flipbook = Flipbook;
 		FlipbookFrame = AnimState;
 		MovementMode = Movement;
-		this->IsActive = IsActive;
+		this->IsVisible = IsVisible;
+		this->IsDead = IsDead;
 	}
 
 	// Variables
@@ -69,7 +71,10 @@ public:
 	TEnumAsByte<EMovementMode> MovementMode;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character Data")
-	bool IsActive;
+	bool IsVisible;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character Data")
+	bool IsDead;
 
 
 	// Operators
@@ -81,7 +86,8 @@ public:
 		Flipbook = CD.Flipbook;
 		FlipbookFrame = CD.FlipbookFrame;
 		MovementMode = CD.MovementMode;
-		IsActive = CD.IsActive;
+		IsVisible = CD.IsVisible;
+		IsDead = CD.IsDead;
 
 		return *this;
 	}

@@ -41,11 +41,17 @@ AMonstarEnemy::AMonstarEnemy()
 	CharacterComponent->bOrientRotationToMovement = false;
 }
 
+void AMonstarEnemy::BeginPlay()
+{
+	Super::BeginPlay();
+	canWalk = true;
+}
+
 void AMonstarEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (isActive)
+	if (canWalk) 
 	{
 		Move(DeltaTime);
 	}
@@ -69,7 +75,8 @@ FCharacterData AMonstarEnemy::IGetCharacterSnapshot_Implementation()
 		FlipbookComponent->GetFlipbook(),
 		FlipbookComponent->GetFlipbook()->GetKeyFrameIndexAtTime(PlaybackTime),
 		CharacterComponent->MovementMode,
-		isActive);
+		isVisible,
+		isDead);
 	return Char;
 }
 
@@ -80,17 +87,21 @@ void AMonstarEnemy::ISetCharacterSnapshot_Implementation(FCharacterData CharData
 	SetActorRotation(CharData.CharacterRotation);
 	FlipbookComponent->SetFlipbook(CharData.Flipbook);
 	FlipbookComponent->SetPlaybackPosition(CharData.FlipbookFrame, true);
-	AMonstarEnemy::Execute_SetActive(this, CharData.IsActive);
+	AMonstarEnemy::Execute_SetActive(this, CharData.IsVisible);
+	isDead = CharData.IsDead;
 }
 
 void AMonstarEnemy::IEnterRewindState_Implementation()
 {
 	CharacterComponent->DisableMovement();
 	FlipbookComponent->Stop();
+	canWalk = false;
 }
 
 void AMonstarEnemy::IExitRewindState_Implementation(FCharacterData CharData)
 {
+	canWalk = true;
+
 	//Set movement mode
 	CharacterComponent->SetMovementMode(CharData.MovementMode);
 
@@ -103,6 +114,19 @@ void AMonstarEnemy::IExitRewindState_Implementation(FCharacterData CharData)
 
 	//Set flipbook and frame
 	FlipbookComponent->Play();
+
+	if (isDead)
+	{
+		DisableCollision();
+		Death();
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("dead")));
+		return;
+	}
+	else
+	{
+		EnableCollision();
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("alive and well")));
+	}
 
 	switch (CharacterComponent->MovementMode)
 	{
@@ -128,7 +152,7 @@ void AMonstarEnemy::IExitRewindState_Implementation(FCharacterData CharData)
 		break;
 	}
 
-	AMonstarEnemy::Execute_SetActive(this, CharData.IsActive);
+	AMonstarEnemy::Execute_SetActive(this, CharData.IsVisible);
 }
 
 

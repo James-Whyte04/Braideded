@@ -18,6 +18,8 @@ class BRAIDEDED_API AMonstarEnemy : public AEnemyCharacter, public IRewindable, 
 	
 public:
 	AMonstarEnemy();
+
+	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 
 	//REWIND INTERFACE FUNCTIONS
@@ -28,4 +30,7 @@ public:
 
 	virtual void ApplyDilationFactor_Implementation(float factor);
 	virtual void ClearTimeDilation_Implementation();
+
+protected:
+	bool canWalk;
 };

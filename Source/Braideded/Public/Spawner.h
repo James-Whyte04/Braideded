@@ -31,19 +31,22 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(EditAnywhere)
 	USceneComponent* SpawnPoint;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(EditAnywhere)
 	UPaperSpriteComponent* Sprite;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(EditAnywhere)
 	UBoxComponent* Collider;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "ObjectPool")
+	UPROPERTY(BlueprintReadWrite, Category = "SpawnProperties")
 	float SpawnDelay;
 
-	UPROPERTY(EditAnywhere, Category = "ObjectPool", meta = (MustImplement = "/Script/BRAIDEDED.Poolable"))
+	UPROPERTY(BlueprintReadWrite, Category = "SpawnProperties")
+	FRotator SpawnRotation;
+
+	UPROPERTY(BlueprintReadWrite, Category = "SpawnProperties", meta = (MustImplement = "/Script/BRAIDEDED.PoolableObject"))
 	TSubclassOf<AActor> ObjectToSpawn;
 
 	TArray<AActor*> ObjectPool;

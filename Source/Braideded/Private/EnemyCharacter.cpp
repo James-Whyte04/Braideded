@@ -41,7 +41,8 @@ void AEnemyCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	canFall = true;
-	isActive = true;
+	isVisible = true;
+	isDead = false;
 #
 	if (canFall)
 	{
@@ -64,18 +65,22 @@ void AEnemyCharacter::Tick(float DeltaTime)
 
 void AEnemyCharacter::Death()
 {
-	isActive = false;
+	isDead = true;
 	FlipbookComponent->SetFlipbook(DeathFlipbook);
 	DisableCollision();
 	LaunchCharacter(FVector(0.f, 0.f, 100.f), false, false);
 
 	DELAY(2.f,
-		{ Execute_SetActive(this, false); });
+		{ Execute_Despawn(this); });
 }
 
 void AEnemyCharacter::Move(float DeltaTime)
 {
-	if (!isActive) return;
+	if (!isVisible || isDead)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("NotWalking")));
+		return;
+	}
 
 	//Add velocity
 	AddMovementInput(GetActorForwardVector(), WalkSpeed * DeltaTime);
@@ -105,7 +110,6 @@ void AEnemyCharacter::EnableCollision()
 {
 	Super::EnableCollision();
 
-	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	HeadCollider->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	if (canFall)
 	{

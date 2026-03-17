@@ -103,7 +103,7 @@ void AA_TimeDilationObject::ISetCharacterSnapshot_Implementation(FCharacterData 
 	SetActorRotation(CharData.CharacterRotation);
 	FlipbookComponent->SetFlipbook(CharData.Flipbook);
 	FlipbookComponent->SetPlaybackPosition(CharData.FlipbookFrame, true);
-	AA_TimeDilationObject::Execute_SetActive(this, CharData.IsActive);
+	AA_TimeDilationObject::Execute_SetActive(this, CharData.IsVisible);
 }
 
 void AA_TimeDilationObject::IEnterRewindState_Implementation()

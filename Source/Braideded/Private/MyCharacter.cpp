@@ -45,13 +45,26 @@ void AMyCharacter::Landed(const FHitResult& Hit)
 //POOLABLE INTERFACE FUNCTIONS
 void AMyCharacter::SetActive_Implementation(bool Active)
 {
-	isActive = Active;
-	SetActorHiddenInGame(!Active);
+	isVisible = Active;
+	SetActorHiddenInGame(!isVisible);
 }
 
 bool AMyCharacter::IsActive_Implementation()
 {
-	return isActive;
+	return isVisible;
+}
+
+void AMyCharacter::Spawn_Implementation(FVector SpawnPoint, FRotator SpawnRotation)
+{
+	AMyCharacter::Execute_SetActive(this, true);
+	isDead = false;
+	SetActorLocation(SpawnPoint);
+	SetActorRotation(SpawnRotation);
+}
+
+void AMyCharacter::Despawn_Implementation()
+{
+	AMyCharacter::Execute_SetActive(this, false);
 }
 
 
@@ -70,6 +83,7 @@ void AMyCharacter::DisableCollision()
 void AMyCharacter::Death()
 {
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Dead");
+	isDead = true;
 }
 
 void AMyCharacter::OnSpikeCollision(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)

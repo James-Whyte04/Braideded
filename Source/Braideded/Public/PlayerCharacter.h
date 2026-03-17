@@ -91,6 +91,8 @@ public:
 	virtual void ApplyDilationFactor_Implementation(float factor);
 	virtual void ClearTimeDilation_Implementation();
 
+	bool IsDead();
+
 protected:
 	float dilationFactor = 1.f;
 
