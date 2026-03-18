@@ -60,11 +60,13 @@ void AMyCharacter::Spawn_Implementation(FVector SpawnPoint, FRotator SpawnRotati
 	isDead = false;
 	SetActorLocation(SpawnPoint);
 	SetActorRotation(SpawnRotation);
+	EnableCollision();
 }
 
 void AMyCharacter::Despawn_Implementation()
 {
 	AMyCharacter::Execute_SetActive(this, false);
+	DisableCollision();
 }
 
 
@@ -82,7 +84,7 @@ void AMyCharacter::DisableCollision()
 
 void AMyCharacter::Death()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Dead");
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "MyCharacter.cpp: Dead");
 	isDead = true;
 }
 
@@ -95,7 +97,7 @@ void AMyCharacter::OnSpikeCollision(UPrimitiveComponent* HitComp, AActor* OtherA
 		return;
 	}
 
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Collision is the map")));
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "MyCharacter.cpp: Collision is the map");
 
 	//Gets the TileMapComponent of the TileMapActor
 	UPaperTileMapComponent* TileMapComponent = Map->FindComponentByClass<UPaperTileMapComponent>();
@@ -111,7 +113,7 @@ void AMyCharacter::OnSpikeCollision(UPrimitiveComponent* HitComp, AActor* OtherA
 	UPaperTileMap* TileMap = TileMapComponent->TileMap;
 	if (!TileMapComponent)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "CAST TO TMap FAILED");
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "MyCharacter.cpp: CAST TO TMap FAILED");
 		return;
 	}
 
@@ -125,7 +127,7 @@ void AMyCharacter::OnSpikeCollision(UPrimitiveComponent* HitComp, AActor* OtherA
 	UPaperTileSet* TileSet = TileInfo.TileSet;
 	if (!TileSet)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "CAST TO TSet FAILED");
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "MyCharacter.cpp: CAST TO TSet FAILED");
 		return;
 	}
 
@@ -140,6 +142,6 @@ void AMyCharacter::OnSpikeCollision(UPrimitiveComponent* HitComp, AActor* OtherA
 	else
 	{
 		//Else ignore
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Not spikes");
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "MyCharacter.cpp: Not spikes");
 	}
 }

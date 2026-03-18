@@ -22,7 +22,6 @@ public:
 	AEnemyCharacter();
 
 	virtual void BeginPlay() override;
-	virtual void Tick(float DeltaTime) override;
 	virtual void Death() override;
 	virtual void Move(float DeltaTime);
 

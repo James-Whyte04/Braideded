@@ -31,30 +31,27 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	USceneComponent* SpawnPoint;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UPaperSpriteComponent* Sprite;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UBoxComponent* Collider;
 
-	UPROPERTY(BlueprintReadWrite, Category = "SpawnProperties")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SpawnProperties")
 	float SpawnDelay;
 
-	UPROPERTY(BlueprintReadWrite, Category = "SpawnProperties")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SpawnProperties")
 	FRotator SpawnRotation;
 
-	UPROPERTY(BlueprintReadWrite, Category = "SpawnProperties", meta = (MustImplement = "/Script/BRAIDEDED.PoolableObject"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SpawnProperties", meta = (MustImplement = "/Script/BRAIDEDED.PoolableObject"))
 	TSubclassOf<AActor> ObjectToSpawn;
 
 	TArray<AActor*> ObjectPool;
 
+	FTimerHandle TimerHandle;
+
 	void Spawn();
-
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
 };

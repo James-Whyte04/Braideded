@@ -14,20 +14,17 @@ AMonstarEnemy::AMonstarEnemy()
 	float Radius = GetCapsuleComponent()->GetScaledCapsuleRadius();
 	float Height = GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
 
-//	HeadCollider = CreateDefaultSubobject<UBoxComponent>(TEXT("HeadCollider"));
 	HeadCollider->SetupAttachment(RootComponent);
 
 	HeadCollider->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	HeadCollider->SetBoxExtent(FVector(Radius - 1.f, Radius - 1.f, 10.f));
 	HeadCollider->SetRelativeLocation(FVector(0.f, 0.f, Height));
 
-//	FloorChecker = CreateDefaultSubobject<UBoxComponent>(TEXT("FloorChecker"));
 	FloorChecker->SetupAttachment(RootComponent);
 
 	FloorChecker->SetBoxExtent(FVector(Radius, Radius, 10.f));
 	FloorChecker->SetRelativeLocation(FVector((2.f * Radius), 0.f, -Height));
 
-//	WallChecker = CreateDefaultSubobject<UBoxComponent>(TEXT("WallChecker"));
 	WallChecker->SetupAttachment(RootComponent);
 
 	WallChecker->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
@@ -56,7 +53,6 @@ void AMonstarEnemy::Tick(float DeltaTime)
 		Move(DeltaTime);
 	}
 }
-
 
 
 
@@ -119,13 +115,13 @@ void AMonstarEnemy::IExitRewindState_Implementation(FCharacterData CharData)
 	{
 		DisableCollision();
 		Death();
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("dead")));
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "MonstarEnemy.cpp: dead");
 		return;
 	}
 	else
 	{
 		EnableCollision();
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("alive and well")));
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("MonstarEnemy.cpp: alive and well")));
 	}
 
 	switch (CharacterComponent->MovementMode)

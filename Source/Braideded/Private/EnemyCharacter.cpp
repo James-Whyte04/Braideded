@@ -41,7 +41,7 @@ void AEnemyCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	canFall = true;
-	isVisible = true;
+	//isVisible = true;
 	isDead = false;
 #
 	if (canFall)
@@ -58,10 +58,12 @@ void AEnemyCharacter::BeginPlay()
 	WallChecker->OnComponentBeginOverlap.AddDynamic(this, &AEnemyCharacter::CheckWall);
 }
 
-void AEnemyCharacter::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-}
+
+
+
+/// <summary>
+/// BASE DEATH FUNCTIONALITY
+/// </summary>
 
 void AEnemyCharacter::Death()
 {
@@ -74,11 +76,18 @@ void AEnemyCharacter::Death()
 		{ Execute_Despawn(this); });
 }
 
+
+
+
+/// <summary>
+/// BASE MOVE FUNCTIONALITY
+/// </summary>
+
 void AEnemyCharacter::Move(float DeltaTime)
 {
 	if (!isVisible || isDead)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("NotWalking")));
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "EnemyCharacter.cpp: Not Walking");
 		return;
 	}
 
@@ -103,8 +112,22 @@ void AEnemyCharacter::Move(float DeltaTime)
 	}
 }
 
+void AEnemyCharacter::ChangeDirection()
+{
+	FRotator Rotation = GetActorRotation();
+	FTransform NewTransform = FTransform(FRotator(Rotation.Pitch, Rotation.Yaw - 180.f, Rotation.Roll),
+		GetActorLocation(),
+		GetActorScale());
+
+	SetActorTransform(NewTransform);
+}
 
 
+
+
+/// <summary>
+/// BASE COLLISION FUNCTIONALITY
+/// </summary>
 
 void AEnemyCharacter::EnableCollision()
 {
@@ -129,22 +152,9 @@ void AEnemyCharacter::DisableCollision()
 	FloorChecker->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
-
-
-
-void AEnemyCharacter::ChangeDirection()
-{
-	FRotator Rotation = GetActorRotation();
-	FTransform NewTransform = FTransform(FRotator(Rotation.Pitch, Rotation.Yaw - 180.f, Rotation.Roll),
-		GetActorLocation(),
-		GetActorScale());
-
-	SetActorTransform(NewTransform);
-}
-
 void AEnemyCharacter::CheckWall(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Triggered Wall Check")));
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "EnemyCharacter.cpp: Triggered Wall Check");
 	APaperTileMapActor* Map = Cast<APaperTileMapActor>(OtherActor);
 	if (Map)
 	{
@@ -157,7 +167,7 @@ void AEnemyCharacter::CheckWall(UPrimitiveComponent* OverlappedComp, AActor* Oth
 
 void AEnemyCharacter::CheckFloor(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Triggered Floor Check")));
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "EnemyCharacter.cpp: Triggered Floor Check");
 	APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor);
 	if (Player == nullptr && !canFall)
 	{
@@ -167,7 +177,7 @@ void AEnemyCharacter::CheckFloor(UPrimitiveComponent* OverlappedComp, AActor* Ot
 
 void AEnemyCharacter::Hit(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Triggered Hit")));
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "EnemyCharacter.cpp: Triggered Hit");
 	APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor);
 	if (Player)
 	{

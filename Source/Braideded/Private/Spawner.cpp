@@ -25,40 +25,42 @@ void ASpawner::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	// Find all objects in object pool of specified type and store them in an array
 	TArray<AActor*> OutActors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ObjectToSpawn, OutActors);
 
-	if (OutActors.Num() == 0) return;
+	if (OutActors.Num() == 0)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Spawner.cpp: No objects of type in scene");
+		return;
+	}
 
 	for (AActor* actor : OutActors)
 	{
 		// Crash prevention
 		ObjectPool.Add(actor);
-		IPoolableObject::Execute_SetActive(actor, false);
+		IPoolableObject::Execute_Despawn(actor);
 	}
-}
 
-// Called every frame
-void ASpawner::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Running Spawn Logic");
-	DELAY(SpawnDelay,
-		{ Spawn(); });
-
+	// Setup Timer for spawn intervals
+	GetWorldTimerManager().SetTimer(TimerHandle, this, &ASpawner::Spawn, SpawnDelay, true);
 }
 
 void ASpawner::Spawn()
 {
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Spawner.cpp: Running");
+
 	for (AActor* actor : ObjectPool)
 	{
 		if (!IPoolableObject::Execute_IsActive(actor))
 		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Spawner.cpp: Spawned");
 			IPoolableObject::Execute_Spawn(actor, SpawnPoint->GetComponentLocation(), SpawnRotation);
 			break;
 		}
 		else
 		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Spawner.cpp: Failed")));
 			continue;
 		}
 	}

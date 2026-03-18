@@ -43,7 +43,7 @@ void UAC_Rewind::BeginPlay()
 		if (actor->GetClass()->ImplementsInterface(URewindable::StaticClass()))
 		{
 			RewindableActors.Add(actor);
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Added")));;
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "AC_Rewind.cpp: Added");;
 		}
 	}
 
@@ -90,11 +90,7 @@ void UAC_Rewind::IActivate_Implementation(float Value)
 	if (!canRewind) return;
 	const int32 Step = (Value > 0.1f) ? 1 : (Value < -0.1f ? -1 : 0);
 	currentBufferIndex = currentBufferIndex + (1 * Step);
-	GEngine->AddOnScreenDebugMessage(
-		-1,
-		5.f,
-		FColor::Red,
-		FString::Printf(TEXT("index: %d"), currentBufferIndex)
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("AC_Rewind.cpp: index: %d"), currentBufferIndex)
 	);
 
 	for (int i = 0; i < RewindableActors.Num(); i++) 

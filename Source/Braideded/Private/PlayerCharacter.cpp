@@ -172,7 +172,7 @@ void APlayerCharacter::ActivateAction1(const FInputActionValue& Value)
 
 void APlayerCharacter::ActivateAction2(const FInputActionValue& Value)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Activating Ability 2");
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "PlayerCharacter.cpp: Activating Ability 2");
 	if (ActionObj2 == nullptr) return;
 
 
@@ -209,7 +209,7 @@ void APlayerCharacter::FDeactivateAction1(const FInputActionValue& Value)
 
 void APlayerCharacter::FDeactivateAction2(const FInputActionValue& Value)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Deactivating");
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "PlayerCharacter.cpp: Deactivating");
 	if (ActionObj2 == nullptr) return;
 
 	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
