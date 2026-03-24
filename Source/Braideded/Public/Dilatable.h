@@ -22,8 +22,8 @@ class IDilatable : public IInterface
 public:
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void ApplyDilationFactor(float factor);
+	void IApplyDilationFactor(float factor);
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void ClearTimeDilation();
+	void IClearTimeDilation();
 };

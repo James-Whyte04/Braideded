@@ -28,8 +28,8 @@ public:
 	virtual void IEnterRewindState_Implementation() override;
 	virtual void IExitRewindState_Implementation(FCharacterData CharData) override;
 
-	virtual void ApplyDilationFactor_Implementation(float factor);
-	virtual void ClearTimeDilation_Implementation();
+	virtual void IApplyDilationFactor_Implementation(float factor);
+	virtual void IClearTimeDilation_Implementation();
 
 protected:
 	bool canWalk;

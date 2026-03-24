@@ -51,11 +51,12 @@ void APlayerCharacter::BeginPlay()
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 		{
-			Subsystem->AddMappingContext(DefaultMappingContext, 0);
+			Subsystem->AddMappingContext(IMC_Default, 0);
 		}
 	}
 
 	SetActions();
+	IPoolableObject::Execute_ISetActive(this, true);
 
 	isGrounded = true;
 }
@@ -72,16 +73,16 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 	if (UEnhancedInputComponent* EIC = CastChecked<UEnhancedInputComponent>(PlayerInputComponent)) 
 	{
-		EIC->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Walk);
+		EIC->BindAction(IA_MoveAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Walk);
 
-		EIC->BindAction(JumpAction, ETriggerEvent::Started, this, &APlayerCharacter::StartJump);
-		EIC->BindAction(JumpAction, ETriggerEvent::Completed, this, &APlayerCharacter::StopJump);
+		EIC->BindAction(IA_JumpAction, ETriggerEvent::Started, this, &APlayerCharacter::StartJump);
+		EIC->BindAction(IA_JumpAction, ETriggerEvent::Completed, this, &APlayerCharacter::StopJump);
 
-		EIC->BindAction(IAction1, ETriggerEvent::Triggered, this, &APlayerCharacter::ActivateAction1);
-		EIC->BindAction(IAction2, ETriggerEvent::Triggered, this, &APlayerCharacter::ActivateAction2);
+		EIC->BindAction(IA_Action1, ETriggerEvent::Triggered, this, &APlayerCharacter::ActivateAction1);
+		EIC->BindAction(IA_Action2, ETriggerEvent::Triggered, this, &APlayerCharacter::ActivateAction2);
 
-		EIC->BindAction(IDeactivateAction1, ETriggerEvent::Triggered, this, &APlayerCharacter::FDeactivateAction1);
-		EIC->BindAction(IDeactivateAction2, ETriggerEvent::Triggered, this, &APlayerCharacter::FDeactivateAction2);
+		EIC->BindAction(IA_DeactivateAction1, ETriggerEvent::Triggered, this, &APlayerCharacter::DeactivateAction1);
+		EIC->BindAction(IA_DeactivateAction2, ETriggerEvent::Triggered, this, &APlayerCharacter::DeactivateAction2);
 	}
 }
 
@@ -162,8 +163,8 @@ void APlayerCharacter::ActivateAction1(const FInputActionValue& Value)
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 		{
-			Subsystem->RemoveMappingContext(DefaultMappingContext);
-			Subsystem->AddMappingContext(Ability1MappingContext, 0);
+			Subsystem->RemoveMappingContext(IMC_Default);
+			Subsystem->AddMappingContext(IMC_Ability1, 0);
 		}
 	}
 
@@ -180,8 +181,8 @@ void APlayerCharacter::ActivateAction2(const FInputActionValue& Value)
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 		{
-			Subsystem->RemoveMappingContext(DefaultMappingContext);
-			Subsystem->AddMappingContext(Ability2MappingContext, 0);
+			Subsystem->RemoveMappingContext(IMC_Default);
+			Subsystem->AddMappingContext(IMC_Ability2, 0);
 		}
 	}
 
@@ -191,7 +192,7 @@ void APlayerCharacter::ActivateAction2(const FInputActionValue& Value)
 
 
 //DEACTIVATE
-void APlayerCharacter::FDeactivateAction1(const FInputActionValue& Value)
+void APlayerCharacter::DeactivateAction1(const FInputActionValue& Value)
 {
 	if (ActionObj1 == nullptr) return;
 
@@ -199,15 +200,15 @@ void APlayerCharacter::FDeactivateAction1(const FInputActionValue& Value)
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 		{
-			Subsystem->RemoveMappingContext(Ability1MappingContext);
-			Subsystem->AddMappingContext(DefaultMappingContext, 0);
+			Subsystem->RemoveMappingContext(IMC_Ability1);
+			Subsystem->AddMappingContext(IMC_Default, 0);
 		}
 	}
 	
 	IAction::Execute_IDeactivate(ActionObj1);
 }
 
-void APlayerCharacter::FDeactivateAction2(const FInputActionValue& Value)
+void APlayerCharacter::DeactivateAction2(const FInputActionValue& Value)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "PlayerCharacter.cpp: Deactivating");
 	if (ActionObj2 == nullptr) return;
@@ -216,8 +217,8 @@ void APlayerCharacter::FDeactivateAction2(const FInputActionValue& Value)
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 		{
-			Subsystem->RemoveMappingContext(Ability2MappingContext);
-			Subsystem->AddMappingContext(DefaultMappingContext, 0);
+			Subsystem->RemoveMappingContext(IMC_Ability2);
+			Subsystem->AddMappingContext(IMC_Default, 0);
 		}
 	}
 
@@ -252,6 +253,7 @@ void APlayerCharacter::ISetCharacterSnapshot_Implementation(FCharacterData CharD
 	FlipbookComponent->SetRelativeRotation(CharData.CharacterRotation);
 	FlipbookComponent->SetFlipbook(CharData.Flipbook);
 	FlipbookComponent->SetPlaybackPosition(CharData.FlipbookFrame, true);
+	isVisible = CharData.IsVisible;
 	isDead = CharData.IsDead;
 }
 
@@ -263,6 +265,7 @@ void APlayerCharacter::IEnterRewindState_Implementation()
 
 void APlayerCharacter::IExitRewindState_Implementation(FCharacterData CharData)
 {
+	EnableCollision();
 	//Set movement mode
 	CharacterComponent->SetMovementMode(CharData.MovementMode);
 
@@ -307,12 +310,12 @@ void APlayerCharacter::IExitRewindState_Implementation(FCharacterData CharData)
 /// TIME DILATION INTERFACE FUNCTIONS
 /// </summary>
 
-void APlayerCharacter::ApplyDilationFactor_Implementation(float factor) 
+void APlayerCharacter::IApplyDilationFactor_Implementation(float factor) 
 {
 	this->CustomTimeDilation = factor;
 }
 
-void APlayerCharacter::ClearTimeDilation_Implementation()
+void APlayerCharacter::IClearTimeDilation_Implementation()
 {
 	this->CustomTimeDilation = 1.f;
 }
@@ -322,6 +325,26 @@ void APlayerCharacter::ClearTimeDilation_Implementation()
 /// <summary>
 /// ACTION RELATED FUNCTIONS
 /// </summary>
+
+int APlayerCharacter::RewindCheck()
+{
+	UAC_Rewind* RewindComponent = Cast<UAC_Rewind>(ActionComponent1);
+
+	if (RewindComponent)
+	{
+		return 1;
+	}
+
+	RewindComponent = Cast<UAC_Rewind>(ActionComponent2);
+
+	if (RewindComponent)
+	{
+		return 2;
+	}
+
+	
+	return 0;
+}
 
 void APlayerCharacter::SetActions()
 {
@@ -339,13 +362,6 @@ void APlayerCharacter::SetActions()
 
 		ActionObj2 = Cast<UObject>(ActionComponent2);
 	}
-	if (Action3)
-	{
-		ActionComponent3 = NewObject<UActorComponent>(this, Action3);
-		ActionComponent3->RegisterComponent();
-
-		ActionObj3 = Cast<UObject>(ActionComponent3);
-	}
 }
 
 void APlayerCharacter::ClearActions()
@@ -362,18 +378,35 @@ void APlayerCharacter::ClearActions()
 		ActionComponent2 = nullptr;
 		ActionObj2 = nullptr;
 	}
-
-	if (ActionComponent3)
-	{
-		ActionComponent3->DestroyComponent();
-		ActionComponent3 = nullptr;
-		ActionObj3 = nullptr;
-	}
 }
 
 
 
-bool APlayerCharacter::IsDead()
+void APlayerCharacter::Death()
 {
-	return isDead;
+	AMyCharacter::Death();
+	DisableCollision();
+	GetMovementComponent()->Velocity.Z = 0;
+	LaunchCharacter(FVector(0.f, 0.f, 100.f), false, false);
+	
+	int RewindComponent = RewindCheck();
+
+	if (RewindComponent == 1)
+	{
+		// Activate action 1 if Action1 is UAC_Rewind
+		DELAY(1.f,
+			{ ActivateAction1(1); });
+	}
+	else if (RewindComponent == 2)
+	{
+		// Activate action 2 if Action2 is UAC_Rewind
+		DELAY(1.f,
+			{ ActivateAction2(1); });
+	}
+	else
+	{
+		// Restart level if player does not have UAC_Rewind Action
+		DELAY(1.f,
+			{ UGameplayStatics::OpenLevel(this, FName(*GetWorld()->GetName()), false); });
+	}
 }

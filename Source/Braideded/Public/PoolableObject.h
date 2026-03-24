@@ -21,14 +21,14 @@ class IPoolableObject : public IInterface
 
 public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void SetActive(bool Active);
+	void ISetActive(bool Active);
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	bool IsActive();
+	bool IIsActive();
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void Despawn();
+	void IDespawn();
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void Spawn(FVector SpawnPoint, FRotator SpawnRotation);
+	void ISpawn(FVector SpawnPoint, FRotator SpawnRotation);
 };

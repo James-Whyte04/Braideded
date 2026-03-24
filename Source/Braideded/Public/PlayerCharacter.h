@@ -9,6 +9,7 @@
 #include "IAction.h"
 #include "Dilatable.h"
 #include "MyCharacter.h"
+#include "AC_Rewind.h"
 #include "PlayerCharacter.generated.h"
 
 /**
@@ -42,34 +43,31 @@ public:
 	void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	UPROPERTY(EditAnywhere, Category = "Input")
-	UInputMappingContext* DefaultMappingContext;
+	UInputMappingContext* IMC_Default;
 
 	UPROPERTY(EditAnywhere, Category = "Input")
-	UInputMappingContext* Ability1MappingContext;
+	UInputMappingContext* IMC_Ability1;
 
 	UPROPERTY(EditAnywhere, Category = "Input")
-	UInputMappingContext* Ability2MappingContext;
-
-	UPROPERTY(EditAnywhere, Category = "Input")
-	UInputMappingContext* Ability3MappingContext;
+	UInputMappingContext* IMC_Ability2;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
-	UInputAction* MoveAction;
+	UInputAction* IA_MoveAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
-	UInputAction* JumpAction;
+	UInputAction* IA_JumpAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
-	UInputAction* IAction1;
+	UInputAction* IA_Action1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
-	UInputAction* IAction2;
+	UInputAction* IA_Action2;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
-	UInputAction* IDeactivateAction1;
+	UInputAction* IA_DeactivateAction1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
-	UInputAction* IDeactivateAction2;
+	UInputAction* IA_DeactivateAction2;
 
 
 
@@ -88,10 +86,10 @@ public:
 	virtual void IEnterRewindState_Implementation() override;
 	virtual void IExitRewindState_Implementation(FCharacterData CharData) override;
 
-	virtual void ApplyDilationFactor_Implementation(float factor);
-	virtual void ClearTimeDilation_Implementation();
+	virtual void IApplyDilationFactor_Implementation(float factor);
+	virtual void IClearTimeDilation_Implementation();
 
-	bool IsDead();
+	virtual void Death() override;
 
 protected:
 	float dilationFactor = 1.f;
@@ -111,16 +109,11 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Actions", meta = (MustImplement = "/Script/BRAIDEDED.Action"))
 	TSubclassOf<UActorComponent> Action2;
 
-	UPROPERTY(EditAnywhere, Category = "Actions", meta = (MustImplement = "/Script/BRAIDEDED.Action"))
-	TSubclassOf<UActorComponent> Action3;
-
 	UActorComponent* ActionComponent1;
 	UActorComponent* ActionComponent2;
-	UActorComponent* ActionComponent3;
 
 	UObject* ActionObj1;
 	UObject* ActionObj2;
-	UObject* ActionObj3;
 
 	//MOVEMENT FUNCTIONS	
 	void Walk(const FInputActionValue& Value);
@@ -131,8 +124,10 @@ protected:
 	//ACTION FUNCTIONS
 	void ActivateAction1(const FInputActionValue& Value);
 	void ActivateAction2(const FInputActionValue& Value);
-	void FDeactivateAction1(const FInputActionValue& Value);
-	void FDeactivateAction2(const FInputActionValue& Value);
+	void DeactivateAction1(const FInputActionValue& Value);
+	void DeactivateAction2(const FInputActionValue& Value);
+
+	int RewindCheck();
 
 	void SetActions();
 	void ClearActions();

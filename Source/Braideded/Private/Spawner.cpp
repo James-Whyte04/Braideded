@@ -25,6 +25,8 @@ void ASpawner::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	isActive = true;
+
 	// Find all objects in object pool of specified type and store them in an array
 	TArray<AActor*> OutActors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ObjectToSpawn, OutActors);
@@ -39,7 +41,7 @@ void ASpawner::BeginPlay()
 	{
 		// Crash prevention
 		ObjectPool.Add(actor);
-		IPoolableObject::Execute_Despawn(actor);
+		IPoolableObject::Execute_IDespawn(actor);
 	}
 
 	// Setup Timer for spawn intervals
@@ -49,13 +51,14 @@ void ASpawner::BeginPlay()
 void ASpawner::Spawn()
 {
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Spawner.cpp: Running");
+	if (!isActive) return;
 
 	for (AActor* actor : ObjectPool)
 	{
-		if (!IPoolableObject::Execute_IsActive(actor))
+		if (!IPoolableObject::Execute_IIsActive(actor))
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Spawner.cpp: Spawned");
-			IPoolableObject::Execute_Spawn(actor, SpawnPoint->GetComponentLocation(), SpawnRotation);
+			IPoolableObject::Execute_ISpawn(actor, SpawnPoint->GetComponentLocation(), SpawnRotation);
 			break;
 		}
 		else
@@ -65,4 +68,28 @@ void ASpawner::Spawn()
 		}
 	}
 
+}
+
+
+
+
+//REWIND INTERFACE FUNCTIONS
+FCharacterData ASpawner::IGetCharacterSnapshot_Implementation()
+{
+	return FCharacterData();
+}
+
+void ASpawner::ISetCharacterSnapshot_Implementation(FCharacterData CharData)
+{
+	return;
+}
+
+void ASpawner::IEnterRewindState_Implementation()
+{
+	isActive = false;
+}
+
+void ASpawner::IExitRewindState_Implementation(FCharacterData CharData)
+{
+	isActive = true;
 }

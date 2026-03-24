@@ -41,11 +41,12 @@ public:
 
 	virtual void Landed(const FHitResult& Hit) override;
 	virtual void Death();
+	bool IsDead();
 
-	virtual void SetActive_Implementation(bool Active) override;
-	virtual bool IsActive_Implementation() override;
-	virtual void Spawn_Implementation(FVector SpawnPoint, FRotator SpawnRotation) override;
-	virtual void Despawn_Implementation() override;
+	virtual void ISetActive_Implementation(bool Active) override;
+	virtual bool IIsActive_Implementation() override;
+	virtual void ISpawn_Implementation(FVector SpawnPoint, FRotator SpawnRotation) override;
+	virtual void IDespawn_Implementation() override;
 
 
 	//FLIPBOOKS
@@ -67,7 +68,7 @@ protected:
 
 	UFUNCTION()
 	void OnSpikeCollision(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
-
+	
 	virtual void EnableCollision();
 	virtual void DisableCollision();
 

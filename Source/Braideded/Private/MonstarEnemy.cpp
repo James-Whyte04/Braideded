@@ -83,7 +83,7 @@ void AMonstarEnemy::ISetCharacterSnapshot_Implementation(FCharacterData CharData
 	SetActorRotation(CharData.CharacterRotation);
 	FlipbookComponent->SetFlipbook(CharData.Flipbook);
 	FlipbookComponent->SetPlaybackPosition(CharData.FlipbookFrame, true);
-	AMonstarEnemy::Execute_SetActive(this, CharData.IsVisible);
+	AMonstarEnemy::Execute_ISetActive(this, CharData.IsVisible);
 	isDead = CharData.IsDead;
 }
 
@@ -148,7 +148,7 @@ void AMonstarEnemy::IExitRewindState_Implementation(FCharacterData CharData)
 		break;
 	}
 
-	AMonstarEnemy::Execute_SetActive(this, CharData.IsVisible);
+	AMonstarEnemy::Execute_ISetActive(this, CharData.IsVisible);
 }
 
 
@@ -157,12 +157,12 @@ void AMonstarEnemy::IExitRewindState_Implementation(FCharacterData CharData)
 /// TIME DILATION INTERFACE FUNCTIONS
 /// </summary>
 
-void AMonstarEnemy::ApplyDilationFactor_Implementation(float factor)
+void AMonstarEnemy::IApplyDilationFactor_Implementation(float factor)
 {
 	this->CustomTimeDilation = factor;
 }
 
-void AMonstarEnemy::ClearTimeDilation_Implementation()
+void AMonstarEnemy::IClearTimeDilation_Implementation()
 {
 	this->CustomTimeDilation = 1.f;
 }

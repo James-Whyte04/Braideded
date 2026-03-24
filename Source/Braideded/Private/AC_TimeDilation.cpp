@@ -43,12 +43,12 @@ void UAC_TimeDilation::CastToTDObject()
 
 	if (TimeDilationActor)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Casted to TDObejct")));
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("AC_TimeDilation: Casted to TDObejct")));
 		TimeDilationActor->SetUpParameters(this, TimeDilationRadius, MaxTimeDilationFactor);
 	}
 	else
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Cast to TDObejct FAILED, add TimeDilationObject to scene")));
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("AC_TimeDilation: Cast to TDObejct FAILED, add TimeDilationObject to scene")));
 	}
 }
 
@@ -66,7 +66,7 @@ void UAC_TimeDilation::IActivate_Implementation(float Value)
 	//set time dilation actor to active
 	if (!TimeDilationActor) return;
 
-	AA_TimeDilationObject::Execute_SetActive(TimeDilationActor, true);
+	AA_TimeDilationObject::Execute_ISetActive(TimeDilationActor, true);
 	TimeDilationActor->SetActorLocation(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)->GetActorLocation());
 }
 
@@ -81,13 +81,13 @@ void UAC_TimeDilation::IDeactivate_Implementation()
 		{
 			if (actor->GetClass()->ImplementsInterface(UDilatable::StaticClass()))
 			{
-				IDilatable::Execute_ClearTimeDilation(actor);
+				IDilatable::Execute_IClearTimeDilation(actor);
 			}
 		}
 	}
 
 	//set time dilation actor to inactive
-	AA_TimeDilationObject::Execute_SetActive(TimeDilationActor, false);
+	AA_TimeDilationObject::Execute_ISetActive(TimeDilationActor, false);
 	TimeDilationActor->SetActorLocation(FVector(0.f, 0.f, 0.f));
 }
 
@@ -101,9 +101,9 @@ void UAC_TimeDilation::IRecord_Implementation()
 		if (actor->GetClass()->ImplementsInterface(UDilatable::StaticClass())) 
 		{
 			float TimeDilationFactor = CalculateTimeDilationFactor(actor);
-			IDilatable::Execute_ApplyDilationFactor(actor, TimeDilationFactor);
-			FString FloatStr = FString::SanitizeFloat(TimeDilationFactor);
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, *FloatStr);
+			IDilatable::Execute_IApplyDilationFactor(actor, TimeDilationFactor);
+		//	FString FloatStr = FString::SanitizeFloat(TimeDilationFactor);
+		//	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, *FloatStr);
 		}
 	}
 }
@@ -115,7 +115,7 @@ void UAC_TimeDilation::IClear_Implementation()
 	{
 		if (actor->GetClass()->ImplementsInterface(UDilatable::StaticClass())) 
 		{
-			IDilatable::Execute_ClearTimeDilation(actor);
+			IDilatable::Execute_IClearTimeDilation(actor);
 		}
 	}
 
@@ -129,8 +129,8 @@ float UAC_TimeDilation::CalculateTimeDilationFactor(AActor* actor)
 
 	float TimeDilationFactor = 1.f;
 	float Distance = FVector::Dist(TimeDilationActor->GetActorLocation(), actor->GetActorLocation());
-	FString Dist = FString::SanitizeFloat(Distance);
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, *Dist);
+	//FString Dist = FString::SanitizeFloat(Distance);
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, *Dist);
 
 	TimeDilationFactor = (m * Distance) + c;
 
@@ -159,7 +159,7 @@ void UAC_TimeDilation::RemoveFromAffectedActors(UPrimitiveComponent* OverlappedC
 	if (OtherActor->GetClass()->ImplementsInterface(UDilatable::StaticClass()) && AffectedActors.Contains(OtherActor))
 	{
 		AffectedActors.Remove(OtherActor);
-		IDilatable::Execute_ClearTimeDilation(OtherActor);
+		IDilatable::Execute_IClearTimeDilation(OtherActor);
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Actor has left zone"));
 	}
 }

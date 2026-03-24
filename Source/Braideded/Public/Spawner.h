@@ -7,6 +7,7 @@
 #include "PaperSpriteComponent.h"
 #include "Components/BoxComponent.h"
 #include "PoolableObject.h"
+#include "Rewindable.h"
 #include "Spawner.generated.h"
 
 
@@ -19,13 +20,18 @@ GetWorld()->GetTimerManager().SetTimer(TimerHandle, [&]()block, time, false);\
 
 
 UCLASS()
-class BRAIDEDED_API ASpawner : public AActor
+class BRAIDEDED_API ASpawner : public AActor, public IRewindable
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
 	ASpawner();
+
+	virtual FCharacterData IGetCharacterSnapshot_Implementation() override;
+	virtual void ISetCharacterSnapshot_Implementation(FCharacterData CharData) override;
+	virtual void IEnterRewindState_Implementation() override;
+	virtual void IExitRewindState_Implementation(FCharacterData CharData) override;
 
 protected:
 	// Called when the game starts or when spawned
@@ -54,4 +60,6 @@ protected:
 	FTimerHandle TimerHandle;
 
 	void Spawn();
+	
+	bool isActive;
 };

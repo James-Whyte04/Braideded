@@ -70,10 +70,11 @@ void AEnemyCharacter::Death()
 	isDead = true;
 	FlipbookComponent->SetFlipbook(DeathFlipbook);
 	DisableCollision();
+	GetCharacterMovement()->Velocity.Z = 0.f;
 	LaunchCharacter(FVector(0.f, 0.f, 100.f), false, false);
 
 	DELAY(2.f,
-		{ Execute_Despawn(this); });
+		{ Execute_IDespawn(this); });
 }
 
 
@@ -87,7 +88,6 @@ void AEnemyCharacter::Move(float DeltaTime)
 {
 	if (!isVisible || isDead)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "EnemyCharacter.cpp: Not Walking");
 		return;
 	}
 
@@ -181,7 +181,8 @@ void AEnemyCharacter::Hit(UPrimitiveComponent* OverlappedComp, AActor* OtherActo
 	APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor);
 	if (Player)
 	{
-		Player->LaunchCharacter(FVector(0.f, 0.f, 1750.f), false, false);
+		Player->GetCharacterMovement()->Velocity.Z = 0.f;
+		Player->LaunchCharacter(FVector(0.f, 0.f, 1000.f), false, false);
 		Death();
 	}
 }

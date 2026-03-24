@@ -6,6 +6,7 @@
 #include "PaperTileMapActor.h"
 #include "PaperTileLayer.h"
 #include "PaperTileSet.h"
+#include "Projectile.h"
 
 AMyCharacter::AMyCharacter()
 {
@@ -43,29 +44,29 @@ void AMyCharacter::Landed(const FHitResult& Hit)
 
 
 //POOLABLE INTERFACE FUNCTIONS
-void AMyCharacter::SetActive_Implementation(bool Active)
+void AMyCharacter::ISetActive_Implementation(bool Active)
 {
 	isVisible = Active;
 	SetActorHiddenInGame(!isVisible);
 }
 
-bool AMyCharacter::IsActive_Implementation()
+bool AMyCharacter::IIsActive_Implementation()
 {
 	return isVisible;
 }
 
-void AMyCharacter::Spawn_Implementation(FVector SpawnPoint, FRotator SpawnRotation)
+void AMyCharacter::ISpawn_Implementation(FVector SpawnPoint, FRotator SpawnRotation)
 {
-	AMyCharacter::Execute_SetActive(this, true);
+	AMyCharacter::Execute_ISetActive(this, true);
 	isDead = false;
 	SetActorLocation(SpawnPoint);
 	SetActorRotation(SpawnRotation);
 	EnableCollision();
 }
 
-void AMyCharacter::Despawn_Implementation()
+void AMyCharacter::IDespawn_Implementation()
 {
-	AMyCharacter::Execute_SetActive(this, false);
+	AMyCharacter::Execute_ISetActive(this, false);
 	DisableCollision();
 }
 
@@ -87,6 +88,14 @@ void AMyCharacter::Death()
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "MyCharacter.cpp: Dead");
 	isDead = true;
 }
+
+bool AMyCharacter::IsDead()
+{
+	return isDead;
+}
+
+
+
 
 void AMyCharacter::OnSpikeCollision(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {

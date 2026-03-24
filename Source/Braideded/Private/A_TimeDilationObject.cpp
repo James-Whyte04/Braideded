@@ -31,7 +31,8 @@ AA_TimeDilationObject::AA_TimeDilationObject()
 void AA_TimeDilationObject::BeginPlay()
 {
 	Super::BeginPlay();
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("hello")));
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("TimeDilationObject: hello")));
+	AA_TimeDilationObject::Execute_ISetActive(this, false);
 }
 
 void AA_TimeDilationObject::SetUpParameters(UAC_TimeDilation* TimeDilationAC, float Radius, float DilationFactor)
@@ -39,7 +40,7 @@ void AA_TimeDilationObject::SetUpParameters(UAC_TimeDilation* TimeDilationAC, fl
 	//Binds overlap events to the functions of the TimeDilation Component
 	if (!TimeDilationAC)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("CAST TO TD FAILED")));
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("TimeDilationObject: CAST TO TD FAILED")));
 		return;
 	}
 
@@ -50,7 +51,7 @@ void AA_TimeDilationObject::SetUpParameters(UAC_TimeDilation* TimeDilationAC, fl
 	MaxTimeDilationFactor = DilationFactor;
 
 	RadiusCollider->SetSphereRadius(TimeDilationRadius);
-	AA_TimeDilationObject::Execute_SetActive(this, false);
+	AA_TimeDilationObject::Execute_ISetActive(this, false);
 }
 
 // Called every frame
@@ -103,7 +104,7 @@ void AA_TimeDilationObject::ISetCharacterSnapshot_Implementation(FCharacterData 
 	SetActorRotation(CharData.CharacterRotation);
 	FlipbookComponent->SetFlipbook(CharData.Flipbook);
 	FlipbookComponent->SetPlaybackPosition(CharData.FlipbookFrame, true);
-	AA_TimeDilationObject::Execute_SetActive(this, CharData.IsVisible);
+	AA_TimeDilationObject::Execute_ISetActive(this, CharData.IsVisible);
 }
 
 void AA_TimeDilationObject::IEnterRewindState_Implementation()
