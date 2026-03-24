@@ -252,7 +252,7 @@ void APlayerCharacter::ISetCharacterSnapshot_Implementation(FCharacterData CharD
 	SetActorLocation(CharData.CharacterPosition);
 	FlipbookComponent->SetRelativeRotation(CharData.CharacterRotation);
 	FlipbookComponent->SetFlipbook(CharData.Flipbook);
-	FlipbookComponent->SetPlaybackPosition(CharData.FlipbookFrame, true);
+	FlipbookComponent->SetPlaybackPosition(CharData.Frame, true);
 	isVisible = CharData.IsVisible;
 	isDead = CharData.IsDead;
 }
@@ -283,7 +283,7 @@ void APlayerCharacter::IExitRewindState_Implementation(FCharacterData CharData)
 	{
 	case MOVE_Falling:
 		FlipbookComponent->SetFlipbook(JumpFlipbook);
-		FlipbookComponent->SetPlaybackPositionInFrames(CharData.FlipbookFrame, false);
+		FlipbookComponent->SetPlaybackPositionInFrames(CharData.Frame, false);
 		break;
 	case MOVE_Walking:
 		if (CharacterComponent->GetCurrentAcceleration().X == 0) 
@@ -295,11 +295,11 @@ void APlayerCharacter::IExitRewindState_Implementation(FCharacterData CharData)
 			FlipbookComponent->SetFlipbook(WalkFlipbook);
 		}
 
-		FlipbookComponent->SetPlaybackPositionInFrames(CharData.FlipbookFrame, false);
+		FlipbookComponent->SetPlaybackPositionInFrames(CharData.Frame, false);
 		break;
 	default:
 		FlipbookComponent->SetFlipbook(IdleFlipbook);
-		FlipbookComponent->SetPlaybackPositionInFrames(CharData.FlipbookFrame, false);
+		FlipbookComponent->SetPlaybackPositionInFrames(CharData.Frame, false);
 		break;
 	}
 }
@@ -310,9 +310,9 @@ void APlayerCharacter::IExitRewindState_Implementation(FCharacterData CharData)
 /// TIME DILATION INTERFACE FUNCTIONS
 /// </summary>
 
-void APlayerCharacter::IApplyDilationFactor_Implementation(float factor) 
+void APlayerCharacter::IApplyDilationFactor_Implementation(float Factor) 
 {
-	this->CustomTimeDilation = factor;
+	this->CustomTimeDilation = Factor;
 }
 
 void APlayerCharacter::IClearTimeDilation_Implementation()

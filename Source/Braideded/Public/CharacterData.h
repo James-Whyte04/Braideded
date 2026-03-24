@@ -32,20 +32,20 @@ public:
 		CharacterRotation = FRotator(0.f, 0.f, 0.f);
 		Velocity = FVector(0.f, 0.f, 0.f);
 		Flipbook = nullptr;
-		FlipbookFrame = 0;
+		Frame = 0.f;
 		MovementMode = EMovementMode::MOVE_None;
 		IsVisible = false;
 		IsDead = true;
 	}
 
 	// Constuctor
-	FCharacterData(FVector CharPos, FRotator CharRot, FVector Vel, UPaperFlipbook *Flipbook, int AnimState, TEnumAsByte<EMovementMode> Movement, bool IsVisible, bool IsDead = false)
+	FCharacterData(FVector CharPos, FRotator CharRot, FVector Vel, UPaperFlipbook *Flipbook, float Frame, TEnumAsByte<EMovementMode> Movement, bool IsVisible, bool IsDead = false)
 	{
 		CharacterPosition = CharPos;
 		CharacterRotation = CharRot;
 		Velocity = Vel;
 		this->Flipbook = Flipbook;
-		FlipbookFrame = AnimState;
+		this->Frame = Frame;
 		MovementMode = Movement;
 		this->IsVisible = IsVisible;
 		this->IsDead = IsDead;
@@ -65,7 +65,7 @@ public:
 	UPaperFlipbook* Flipbook;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character Data")
-	int FlipbookFrame;
+	float Frame;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character Data")
 	TEnumAsByte<EMovementMode> MovementMode;
@@ -84,7 +84,7 @@ public:
 		CharacterRotation = CD.CharacterRotation;
 		Velocity = CD.Velocity;
 		Flipbook = CD.Flipbook;
-		FlipbookFrame = CD.FlipbookFrame;
+		Frame = CD.Frame;
 		MovementMode = CD.MovementMode;
 		IsVisible = CD.IsVisible;
 		IsDead = CD.IsDead;

@@ -45,30 +45,53 @@ void ASpawner::BeginPlay()
 	}
 
 	// Setup Timer for spawn intervals
-	GetWorldTimerManager().SetTimer(TimerHandle, this, &ASpawner::Spawn, SpawnDelay, true);
+	GetWorldTimerManager().SetTimer(SpawnHandle, this, &ASpawner::Spawn, SpawnDelay, true);
 }
+
+
+
+
 
 void ASpawner::Spawn()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Spawner.cpp: Running");
 	if (!isActive) return;
 
 	for (AActor* actor : ObjectPool)
 	{
 		if (!IPoolableObject::Execute_IIsActive(actor))
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Spawner.cpp: Spawned");
 			IPoolableObject::Execute_ISpawn(actor, SpawnPoint->GetComponentLocation(), SpawnRotation);
 			break;
 		}
 		else
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Spawner.cpp: Failed")));
+			continue;
+		}
+	}
+}
+
+void ASpawner::ResumeSpawn()
+{
+	if (!isActive) return;
+
+	for (AActor* actor : ObjectPool)
+	{
+		if (!IPoolableObject::Execute_IIsActive(actor))
+		{
+			IPoolableObject::Execute_ISpawn(actor, SpawnPoint->GetComponentLocation(), SpawnRotation);
+			break;
+		}
+		else
+		{
 			continue;
 		}
 	}
 
+	GetWorldTimerManager().SetTimer(SpawnHandle, this, &ASpawner::Spawn, SpawnDelay, true);
 }
+
+
+
 
 
 
@@ -76,20 +99,39 @@ void ASpawner::Spawn()
 //REWIND INTERFACE FUNCTIONS
 FCharacterData ASpawner::IGetCharacterSnapshot_Implementation()
 {
-	return FCharacterData();
+	FCharacterData Character = FCharacterData();
+	Character.Frame = GetWorldTimerManager().GetTimerRemaining(SpawnHandle);
+	return Character;
 }
 
 void ASpawner::ISetCharacterSnapshot_Implementation(FCharacterData CharData)
 {
+	SpawnTime = CharData.Frame;
 	return;
 }
 
 void ASpawner::IEnterRewindState_Implementation()
 {
 	isActive = false;
+	GetWorldTimerManager().ClearTimer(SpawnHandle);
 }
 
 void ASpawner::IExitRewindState_Implementation(FCharacterData CharData)
 {
 	isActive = true;
+	SpawnTime = CharData.Frame;
+	GetWorldTimerManager().SetTimer(SpawnHandle, this, &ASpawner::ResumeSpawn, SpawnTime, false);
+}
+
+
+
+//TIME DILATION INTERFACE FUNCTIONS
+void ASpawner::IApplyDilationFactor_Implementation(float Factor)
+{
+	this->CustomTimeDilation = Factor;
+}
+
+void ASpawner::IClearTimeDilation_Implementation()
+{
+	this->CustomTimeDilation = 1.f;
 }

@@ -86,7 +86,7 @@ public:
 	virtual void IEnterRewindState_Implementation() override;
 	virtual void IExitRewindState_Implementation(FCharacterData CharData) override;
 
-	virtual void IApplyDilationFactor_Implementation(float factor);
+	virtual void IApplyDilationFactor_Implementation(float Factor);
 	virtual void IClearTimeDilation_Implementation();
 
 	virtual void Death() override;

@@ -83,7 +83,7 @@ void AProjectile::ISetCharacterSnapshot_Implementation(FCharacterData CharData)
 	SetActorLocation(CharData.CharacterPosition);
 	SetActorRotation(CharData.CharacterRotation);
 	FlipbookComponent->SetFlipbook(CharData.Flipbook);
-	FlipbookComponent->SetPlaybackPositionInFrames(CharData.FlipbookFrame, false);
+	FlipbookComponent->SetPlaybackPositionInFrames(CharData.Frame, false);
 	isVisible = CharData.IsVisible;
 	SetActorHiddenInGame(!isVisible);
 }
@@ -100,7 +100,7 @@ void AProjectile::IExitRewindState_Implementation(FCharacterData CharData)
 
 	FlipbookComponent->Play();
 	FlipbookComponent->SetFlipbook(CharData.Flipbook);
-	FlipbookComponent->SetPlaybackPositionInFrames(CharData.FlipbookFrame, false);
+	FlipbookComponent->SetPlaybackPositionInFrames(CharData.Frame, false);
 
 	isVisible = CharData.IsVisible;
 	SetActorHiddenInGame(!isVisible);

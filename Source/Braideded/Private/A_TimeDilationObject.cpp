@@ -103,7 +103,7 @@ void AA_TimeDilationObject::ISetCharacterSnapshot_Implementation(FCharacterData 
 	SetActorLocation(CharData.CharacterPosition);
 	SetActorRotation(CharData.CharacterRotation);
 	FlipbookComponent->SetFlipbook(CharData.Flipbook);
-	FlipbookComponent->SetPlaybackPosition(CharData.FlipbookFrame, true);
+	FlipbookComponent->SetPlaybackPosition(CharData.Frame, true);
 	AA_TimeDilationObject::Execute_ISetActive(this, CharData.IsVisible);
 }
 

@@ -53,7 +53,8 @@ void AEnemyCharacter::BeginPlay()
 		FloorChecker->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	}
 
-	HeadCollider->OnComponentBeginOverlap.AddDynamic(this, &AEnemyCharacter::Hit);
+	GetCapsuleComponent()->OnComponentHit.AddDynamic(this, &AEnemyCharacter::BodyHit);
+	HeadCollider->OnComponentBeginOverlap.AddDynamic(this, &AEnemyCharacter::HeadHit);
 	FloorChecker->OnComponentEndOverlap.AddDynamic(this, &AEnemyCharacter::CheckFloor);
 	WallChecker->OnComponentBeginOverlap.AddDynamic(this, &AEnemyCharacter::CheckWall);
 }
@@ -73,10 +74,13 @@ void AEnemyCharacter::Death()
 	GetCharacterMovement()->Velocity.Z = 0.f;
 	LaunchCharacter(FVector(0.f, 0.f, 100.f), false, false);
 
-	DELAY(2.f,
-		{ Execute_IDespawn(this); });
+	GetWorldTimerManager().SetTimer(DeathHandle, this, &AEnemyCharacter::HandleDespawn, 1.f, false);
 }
 
+void AEnemyCharacter::HandleDespawn()
+{
+	IPoolableObject::Execute_IDespawn(this);
+}
 
 
 
@@ -155,8 +159,12 @@ void AEnemyCharacter::DisableCollision()
 void AEnemyCharacter::CheckWall(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "EnemyCharacter.cpp: Triggered Wall Check");
-	APaperTileMapActor* Map = Cast<APaperTileMapActor>(OtherActor);
-	if (Map)
+
+	if (Cast<APaperTileMapActor>(OtherActor))
+	{
+		ChangeDirection();
+	}
+	else if (Cast<AEnemyCharacter>(OtherActor))
 	{
 		ChangeDirection();
 	}
@@ -175,7 +183,7 @@ void AEnemyCharacter::CheckFloor(UPrimitiveComponent* OverlappedComp, AActor* Ot
 	}
 }
 
-void AEnemyCharacter::Hit(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void AEnemyCharacter::HeadHit(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "EnemyCharacter.cpp: Triggered Hit");
 	APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor);
@@ -184,5 +192,15 @@ void AEnemyCharacter::Hit(UPrimitiveComponent* OverlappedComp, AActor* OtherActo
 		Player->GetCharacterMovement()->Velocity.Z = 0.f;
 		Player->LaunchCharacter(FVector(0.f, 0.f, 1000.f), false, false);
 		Death();
+	}
+}
+
+void AEnemyCharacter::BodyHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "EnemyCharacter.cpp: Triggered Hit");
+	APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor);
+	if (Player)
+	{
+		Player->Death();
 	}
 }

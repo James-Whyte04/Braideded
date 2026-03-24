@@ -82,7 +82,7 @@ void AMonstarEnemy::ISetCharacterSnapshot_Implementation(FCharacterData CharData
 	SetActorLocation(CharData.CharacterPosition);
 	SetActorRotation(CharData.CharacterRotation);
 	FlipbookComponent->SetFlipbook(CharData.Flipbook);
-	FlipbookComponent->SetPlaybackPosition(CharData.FlipbookFrame, true);
+	FlipbookComponent->SetPlaybackPosition(CharData.Frame, true);
 	AMonstarEnemy::Execute_ISetActive(this, CharData.IsVisible);
 	isDead = CharData.IsDead;
 }
@@ -92,6 +92,11 @@ void AMonstarEnemy::IEnterRewindState_Implementation()
 	CharacterComponent->DisableMovement();
 	FlipbookComponent->Stop();
 	canWalk = false;
+
+	if (GetWorldTimerManager().IsTimerActive(DeathHandle))
+	{
+		GetWorldTimerManager().ClearTimer(DeathHandle);
+	}
 }
 
 void AMonstarEnemy::IExitRewindState_Implementation(FCharacterData CharData)
@@ -103,7 +108,7 @@ void AMonstarEnemy::IExitRewindState_Implementation(FCharacterData CharData)
 
 	//Set position and rotation
 	SetActorLocation(CharData.CharacterPosition);
-	FlipbookComponent->SetRelativeRotation(CharData.CharacterRotation);
+	SetActorRotation(CharData.CharacterRotation);
 
 	//Set velocity
 	CharacterComponent->Velocity = CharData.Velocity;
@@ -115,20 +120,20 @@ void AMonstarEnemy::IExitRewindState_Implementation(FCharacterData CharData)
 	{
 		DisableCollision();
 		Death();
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "MonstarEnemy.cpp: dead");
+	//	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "MonstarEnemy.cpp: dead");
 		return;
 	}
 	else
 	{
 		EnableCollision();
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("MonstarEnemy.cpp: alive and well")));
+	//	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("MonstarEnemy.cpp: alive and well")));
 	}
 
 	switch (CharacterComponent->MovementMode)
 	{
 	case MOVE_Falling:
 		FlipbookComponent->SetFlipbook(JumpFlipbook);
-		FlipbookComponent->SetPlaybackPositionInFrames(CharData.FlipbookFrame, false);
+		FlipbookComponent->SetPlaybackPositionInFrames(CharData.Frame, false);
 		break;
 	case MOVE_Walking:
 		if (CharacterComponent->GetCurrentAcceleration().X == 0)
@@ -140,11 +145,11 @@ void AMonstarEnemy::IExitRewindState_Implementation(FCharacterData CharData)
 			FlipbookComponent->SetFlipbook(WalkFlipbook);
 		}
 
-		FlipbookComponent->SetPlaybackPositionInFrames(CharData.FlipbookFrame, false);
+		FlipbookComponent->SetPlaybackPositionInFrames(CharData.Frame, false);
 		break;
 	default:
 		FlipbookComponent->SetFlipbook(IdleFlipbook);
-		FlipbookComponent->SetPlaybackPositionInFrames(CharData.FlipbookFrame, false);
+		FlipbookComponent->SetPlaybackPositionInFrames(CharData.Frame, false);
 		break;
 	}
 
@@ -157,9 +162,9 @@ void AMonstarEnemy::IExitRewindState_Implementation(FCharacterData CharData)
 /// TIME DILATION INTERFACE FUNCTIONS
 /// </summary>
 
-void AMonstarEnemy::IApplyDilationFactor_Implementation(float factor)
+void AMonstarEnemy::IApplyDilationFactor_Implementation(float Factor)
 {
-	this->CustomTimeDilation = factor;
+	this->CustomTimeDilation = Factor;
 }
 
 void AMonstarEnemy::IClearTimeDilation_Implementation()
