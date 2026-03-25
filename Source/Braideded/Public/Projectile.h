@@ -40,6 +40,7 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaTime) override;
 	void AddVelocity(float DeltaTime);
 
 	UFUNCTION()
@@ -54,12 +55,11 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	USphereComponent* Collider;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Properties")
 	float Velocity;
+
+	FTimerHandle ProjectileHandle;
+
 	bool isVisible;
 	bool isActive;
-
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
 };

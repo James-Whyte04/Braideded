@@ -89,6 +89,7 @@ void AMonstarEnemy::ISetCharacterSnapshot_Implementation(FCharacterData CharData
 
 void AMonstarEnemy::IEnterRewindState_Implementation()
 {
+	DisableCollision();
 	CharacterComponent->DisableMovement();
 	FlipbookComponent->Stop();
 	canWalk = false;
@@ -103,15 +104,11 @@ void AMonstarEnemy::IExitRewindState_Implementation(FCharacterData CharData)
 {
 	canWalk = true;
 
-	//Set movement mode
-	CharacterComponent->SetMovementMode(CharData.MovementMode);
-
 	//Set position and rotation
 	SetActorLocation(CharData.CharacterPosition);
 	SetActorRotation(CharData.CharacterRotation);
 
-	//Set velocity
-	CharacterComponent->Velocity = CharData.Velocity;
+	isDead = CharData.IsDead;
 
 	//Set flipbook and frame
 	FlipbookComponent->Play();
@@ -128,6 +125,12 @@ void AMonstarEnemy::IExitRewindState_Implementation(FCharacterData CharData)
 		EnableCollision();
 	//	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("MonstarEnemy.cpp: alive and well")));
 	}
+
+	//Set movement mode
+	CharacterComponent->SetMovementMode(CharData.MovementMode);
+
+	//Set velocity
+	CharacterComponent->Velocity = CharData.Velocity;
 
 	switch (CharacterComponent->MovementMode)
 	{

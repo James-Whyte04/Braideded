@@ -95,6 +95,12 @@ void UAC_Rewind::IActivate_Implementation(float Value)
 
 	for (int i = 0; i < RewindableActors.Num(); i++) 
 	{
+		if (!IsValid(RewindableActors[i]))
+		{
+			RemoveActor(i);
+			return;
+		}
+
 		if (!isRewinding)
 		{
 			IRewindable::Execute_IEnterRewindState(RewindableActors[i]);
@@ -151,6 +157,12 @@ void UAC_Rewind::IRecord_Implementation()
 
 	for (int i = 0; i < RewindableActors.Num(); i++) 
 	{
+		if (!IsValid(RewindableActors[i]))
+		{
+			RemoveActor(i);
+			return;
+		}
+
 		FCharacterData Char = IRewindable::Execute_IGetCharacterSnapshot(RewindableActors[i]);
 		if (ActorsStates[i].Num() >= bufferSize) 
 		{
@@ -178,4 +190,14 @@ void UAC_Rewind::IClear_Implementation()
 	}
 
 	ActorsStates.Empty();
+}
+
+
+
+
+void UAC_Rewind::RemoveActor(int Index)
+{
+	RewindableActors.RemoveAt(Index);
+	ActorsStates[Index].Empty();
+	ActorsStates.RemoveAt(Index);
 }

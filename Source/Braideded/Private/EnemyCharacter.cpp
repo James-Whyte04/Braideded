@@ -5,6 +5,8 @@
 #include "PaperCharacter.h"
 #include "PlayerCharacter.h"
 #include "PaperTileMapActor.h"
+#include "Projectile.h"
+#include "Spawner.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 AEnemyCharacter::AEnemyCharacter()
@@ -41,6 +43,7 @@ void AEnemyCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	canFall = true;
+	canChangeDirection = true;
 	//isVisible = true;
 	isDead = false;
 #
@@ -118,12 +121,19 @@ void AEnemyCharacter::Move(float DeltaTime)
 
 void AEnemyCharacter::ChangeDirection()
 {
+	canChangeDirection = false;
+
 	FRotator Rotation = GetActorRotation();
 	FTransform NewTransform = FTransform(FRotator(Rotation.Pitch, Rotation.Yaw - 180.f, Rotation.Roll),
 		GetActorLocation(),
 		GetActorScale());
 
 	SetActorTransform(NewTransform);
+
+	GetWorldTimerManager().SetTimerForNextTick([this]()
+		{
+			canChangeDirection = true;
+		});
 }
 
 
@@ -163,12 +173,20 @@ void AEnemyCharacter::CheckWall(UPrimitiveComponent* OverlappedComp, AActor* Oth
 	if (Cast<APaperTileMapActor>(OtherActor))
 	{
 		ChangeDirection();
+		return;
 	}
-	else if (Cast<AEnemyCharacter>(OtherActor))
+
+	else if (Cast<ASpawner>(OtherActor))
 	{
 		ChangeDirection();
+		return;
 	}
-	else return;
+
+	else if (Cast<AEnemyCharacter>(OtherActor) && OtherActor != this)
+	{
+		ChangeDirection();
+		return;
+	}
 
 	//do same check for projectile when implemented
 }

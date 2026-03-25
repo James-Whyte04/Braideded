@@ -61,6 +61,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SpawnProperties")
 	FRotator SpawnRotation;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SpawnProperties")
+	FVector SpawnImpulse;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SpawnProperties", meta = (MustImplement = "/Script/BRAIDEDED.PoolableObject"))
 	TSubclassOf<AActor> ObjectToSpawn;
 

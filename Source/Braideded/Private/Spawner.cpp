@@ -2,6 +2,7 @@
 
 
 #include "Spawner.h"
+#include "MyCharacter.h"
 #include "Kismet/GameplayStatics.h"
 
 // Sets default values
@@ -51,7 +52,8 @@ void ASpawner::BeginPlay()
 
 
 
-
+//SPAWNING FUNCTIONS
+// General Spawn function
 void ASpawner::Spawn()
 {
 	if (!isActive) return;
@@ -60,7 +62,16 @@ void ASpawner::Spawn()
 	{
 		if (!IPoolableObject::Execute_IIsActive(actor))
 		{
+			// Spawn actor at spawn point
 			IPoolableObject::Execute_ISpawn(actor, SpawnPoint->GetComponentLocation(), SpawnRotation);
+
+			// If is character, add impulse
+			AMyCharacter* Character = Cast<AMyCharacter>(actor);
+			if (Character) 
+			{
+				Character->LaunchCharacter(SpawnImpulse, false, false);
+			}
+
 			break;
 		}
 		else
@@ -70,6 +81,7 @@ void ASpawner::Spawn()
 	}
 }
 
+// This function is called when exiting rewind, this is required to start recurring spawning again via Timers
 void ASpawner::ResumeSpawn()
 {
 	if (!isActive) return;
@@ -78,7 +90,16 @@ void ASpawner::ResumeSpawn()
 	{
 		if (!IPoolableObject::Execute_IIsActive(actor))
 		{
+			// Spawn actor at spawn point
 			IPoolableObject::Execute_ISpawn(actor, SpawnPoint->GetComponentLocation(), SpawnRotation);
+
+			// If is character, add impulse
+			AMyCharacter* Character = Cast<AMyCharacter>(actor);
+			if (Character)
+			{
+				Character->LaunchCharacter(SpawnImpulse, false, false);
+			}
+
 			break;
 		}
 		else
@@ -93,13 +114,12 @@ void ASpawner::ResumeSpawn()
 
 
 
-
-
-
 //REWIND INTERFACE FUNCTIONS
 FCharacterData ASpawner::IGetCharacterSnapshot_Implementation()
 {
 	FCharacterData Character = FCharacterData();
+
+	// Only stores the remaining time of the timer in the Frame float
 	Character.Frame = GetWorldTimerManager().GetTimerRemaining(SpawnHandle);
 	return Character;
 }
@@ -120,8 +140,11 @@ void ASpawner::IExitRewindState_Implementation(FCharacterData CharData)
 {
 	isActive = true;
 	SpawnTime = CharData.Frame;
+
+	// Calls the ResumeSpawn function
 	GetWorldTimerManager().SetTimer(SpawnHandle, this, &ASpawner::ResumeSpawn, SpawnTime, false);
 }
+
 
 
 

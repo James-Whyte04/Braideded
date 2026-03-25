@@ -33,6 +33,8 @@ protected:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	void RemoveActor(int Index);
+
 	// Variables
 	float timeScale;
 	int bufferSize;
@@ -43,5 +45,7 @@ protected:
 
 	// Array for each character in the scene, Queue for the actor's states
 	TArray< TArray<FCharacterData> > ActorsStates;
+
+	UPROPERTY()
 	TArray< UObject* > RewindableActors;
 };

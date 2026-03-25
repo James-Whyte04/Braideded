@@ -54,4 +54,5 @@ protected:
 
 private:
 	void HandleDespawn();
+	bool canChangeDirection;
 };

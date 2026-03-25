@@ -16,6 +16,8 @@ AProjectile::AProjectile()
 	FlipbookComponent = CreateDefaultSubobject<UPaperFlipbookComponent>("Flipbook");
 	FlipbookComponent->SetupAttachment(RootComponent);
 	FlipbookComponent->SetFlipbook(ProjectileFlipbook);
+
+	Velocity = 100.f;
 }
 
 // Called when the game starts or when spawned
@@ -29,19 +31,12 @@ void AProjectile::BeginPlay()
 	Collider->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 
 	Collider->OnComponentBeginOverlap.AddDynamic(this, &AProjectile::OnProjectileCollision);
+	SetActorTickEnabled(true);
 }
 
-// Called every frame
 void AProjectile::Tick(float DeltaTime)
 {
-	Super::Tick(DeltaTime);
-
-	if (isActive)
-	{
-		//add movement
-		//AddActorWorldTransform
-		AddVelocity(DeltaTime);
-	}
+	AddVelocity(DeltaTime);
 }
 
 
@@ -51,10 +46,9 @@ void AProjectile::AddVelocity(float DeltaTime)
 {
 	FVector CurrentLocation = GetActorLocation();
 
-	FVector NewLocation = FMath::VInterpConstantTo(CurrentLocation,
-		CurrentLocation + GetActorForwardVector(),
-		DeltaTime,
-		Velocity);
+	FVector NewLocation = CurrentLocation + (GetActorForwardVector() * Velocity) * DeltaTime;
+
+	SetActorLocation(NewLocation);
 }
 
 
@@ -91,6 +85,7 @@ void AProjectile::ISetCharacterSnapshot_Implementation(FCharacterData CharData)
 void AProjectile::IEnterRewindState_Implementation()
 {
 	FlipbookComponent->Stop();
+	SetActorTickEnabled(false);
 }
 
 void AProjectile::IExitRewindState_Implementation(FCharacterData CharData)
@@ -105,6 +100,15 @@ void AProjectile::IExitRewindState_Implementation(FCharacterData CharData)
 	isVisible = CharData.IsVisible;
 	SetActorHiddenInGame(!isVisible);
 	IPoolableObject::Execute_ISetActive(this, CharData.IsDead);
+
+	if (isActive)
+	{
+		SetActorTickEnabled(true);
+	}
+	else
+	{
+		SetActorTickEnabled(false);
+	}
 }
 
 
@@ -148,11 +152,13 @@ bool AProjectile::IIsActive_Implementation()
 
 void AProjectile::ISpawn_Implementation(FVector SpawnPoint, FRotator SpawnRotation)
 {
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "AProjectile.cpp: Spawned");
 	isVisible = true;
 	IPoolableObject::Execute_ISetActive(this, true);
 	SetActorHiddenInGame(!isVisible);
 	SetActorLocation(SpawnPoint);
 	SetActorRotation(SpawnRotation);
+	SetActorTickEnabled(true);
 }
 
 void AProjectile::IDespawn_Implementation()
@@ -162,6 +168,7 @@ void AProjectile::IDespawn_Implementation()
 	SetActorHiddenInGame(!isVisible);
 	SetActorLocation(FVector(0.f, 0.f, 0.f));
 	SetActorRotation(FRotator(0.f, 0.f, 0.f));
+	SetActorTickEnabled(false);
 }
 
 
