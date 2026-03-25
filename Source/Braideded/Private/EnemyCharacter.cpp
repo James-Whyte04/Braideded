@@ -131,9 +131,7 @@ void AEnemyCharacter::ChangeDirection()
 	SetActorTransform(NewTransform);
 
 	GetWorldTimerManager().SetTimerForNextTick([this]()
-		{
-			canChangeDirection = true;
-		});
+		{ canChangeDirection = true;} );
 }
 
 
@@ -169,6 +167,8 @@ void AEnemyCharacter::DisableCollision()
 void AEnemyCharacter::CheckWall(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "EnemyCharacter.cpp: Triggered Wall Check");
+
+	if (!canChangeDirection) return;
 
 	if (Cast<APaperTileMapActor>(OtherActor))
 	{
