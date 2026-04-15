@@ -154,6 +154,8 @@ void AEnemyCharacter::EnableCollision()
 	{
 		FloorChecker->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	}
+
+	CharacterComponent->SetMovementMode(MOVE_Walking);
 }
 
 void AEnemyCharacter::DisableCollision()
