@@ -8,16 +8,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "CharacterData.generated.h"
 
-/**
- * 
- */
-
-enum PlayerState
-{
-	Alive = 0,
-	Dead = 1,
-};
-
+// Description: Struct used to store the snapshot data
+// of a actors, used for rewinding
 USTRUCT(BlueprintType)
 struct FCharacterData
 {
@@ -25,7 +17,8 @@ struct FCharacterData
 
 public:
 
-	// Empty constructor
+	// Empty constructor,
+	// Initializes variables to default values
 	FCharacterData() 
 	{
 		CharacterPosition = FVector(0.f, 0.f, 0.f);
@@ -38,7 +31,8 @@ public:
 		IsDead = true;
 	}
 
-	// Constuctor
+	// Constuctor,
+	// Provide necessary data to fully restore an actor's state when rewinding
 	FCharacterData(FVector CharPos, FRotator CharRot, FVector Vel, UPaperFlipbook *Flipbook, float Frame, TEnumAsByte<EMovementMode> Movement, bool IsVisible, bool IsDead = false)
 	{
 		CharacterPosition = CharPos;
@@ -51,7 +45,6 @@ public:
 		this->IsDead = IsDead;
 	}
 
-	// Variables
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character Data")
 	FVector CharacterPosition;
 

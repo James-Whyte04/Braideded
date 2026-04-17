@@ -11,41 +11,40 @@
 #include "Dilatable.h"
 #include "Spawner.generated.h"
 
-
 #define DELAY(time, block)\
 {\
 FTimerHandle TimerHandle;\
 GetWorld()->GetTimerManager().SetTimer(TimerHandle, [&]()block, time, false);\
 }
 
-
-
+// Description: Spawns an actor of a class specified in the editor
+// after a specified delay, impulse can be applied to characters
 UCLASS()
 class BRAIDEDED_API ASpawner : public AActor, public IRewindable, public IDilatable
 {
 	GENERATED_BODY()
 	
 public:	
-	// Sets default values for this actor's properties
+	// Constructor
 	ASpawner();
 
-
-	//REWIND INTERFACE FUNCTIONS
+	// Rewind Interface functions
 	virtual FCharacterData IGetCharacterSnapshot_Implementation() override;
 	virtual void ISetCharacterSnapshot_Implementation(FCharacterData CharData) override;
 	virtual void IEnterRewindState_Implementation() override;
 	virtual void IExitRewindState_Implementation(FCharacterData CharData) override;
 
-	//TIME DILATION INTERFACE FUNCTIONS
+	// Time Dilation Interface functions
 	virtual void IApplyDilationFactor_Implementation(float Factor) override;
 	virtual void IClearTimeDilation_Implementation() override;
 
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-//	virtual void Tick(float DeltaTime) override;
 
+	virtual void BeginPlay() override;
+
+
+	// Standard components
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	USceneComponent* SpawnPoint;
 
@@ -71,6 +70,9 @@ protected:
 
 	FTimerHandle SpawnHandle;
 
+	// Spawning functions
+	// ResumeSpawn is called when exiting rewind,
+	// this is required to start recurring spawning
 	void Spawn();
 	void ResumeSpawn();
 	

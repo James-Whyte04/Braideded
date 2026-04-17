@@ -11,17 +11,15 @@
 #include "PaperTileMapComponent.h"
 #include "MyCharacter.generated.h"
 
-/**
- * 
- */
-
 #define DELAY(time, block)\
 {\
 FTimerHandle TimerHandle;\
 GetWorld()->GetTimerManager().SetTimer(TimerHandle, [&]()block, time, false);\
 }
 
-
+// Description: Base character class,
+// contains basic movement and mechanics
+// that are shared between the player and enemies
 UCLASS()
 class BRAIDEDED_API AMyCharacter : public APaperCharacter, public IPoolableObject
 {
@@ -30,26 +28,32 @@ class BRAIDEDED_API AMyCharacter : public APaperCharacter, public IPoolableObjec
 public:
 	AMyCharacter();
 
+	virtual void BeginPlay() override;
+	virtual void Death();
+	bool IsDead();
+
+	// Poolable Object Interface functions
+	virtual void ISetActive_Implementation(bool Active) override;
+	virtual bool IIsActive_Implementation() override;
+	virtual void ISpawn_Implementation(FVector SpawnPoint, FRotator SpawnRotation) override;
+	virtual void IDespawn_Implementation() override;
+
+protected:
+
+	UFUNCTION()
+	void OnSpikeCollision(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+	
+	virtual void EnableCollision();
+	virtual void DisableCollision();
+
+	// Movement variables
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float WalkSpeed;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float SprintSpeed;
 
-	virtual void BeginPlay() override;
-	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
-
-	virtual void Landed(const FHitResult& Hit) override;
-	virtual void Death();
-	bool IsDead();
-
-	virtual void ISetActive_Implementation(bool Active) override;
-	virtual bool IIsActive_Implementation() override;
-	virtual void ISpawn_Implementation(FVector SpawnPoint, FRotator SpawnRotation) override;
-	virtual void IDespawn_Implementation() override;
-
-
-	//FLIPBOOKS
+	// Flipbooks
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Flipbook")
 	UPaperFlipbook* IdleFlipbook;
 
@@ -64,13 +68,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Flipbook")
 	UPaperFlipbook* DeathFlipbook;
-protected:
-
-	UFUNCTION()
-	void OnSpikeCollision(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
-	
-	virtual void EnableCollision();
-	virtual void DisableCollision();
 
 	UPaperFlipbookComponent* FlipbookComponent;
 	UCharacterMovementComponent* CharacterComponent;

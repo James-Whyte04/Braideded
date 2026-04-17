@@ -12,31 +12,37 @@
 
 class UAC_TimeDilation;
 
+// Description: The actor that is spawned in scene
+// when the time dilation action is activated,
+// sends the actors that enter its radius to the 
+// Time Dilation Component to time dilation to them
 UCLASS()
 class BRAIDEDED_API AA_TimeDilationObject : public AActor, public IPoolableObject, public IRewindable
 {
 	GENERATED_BODY()
 	
 public:	
+	// Constructor
 	AA_TimeDilationObject();
 
+	// IPoolableObject interface functions
 	virtual void SetActive_Implementation(bool Active);
 	virtual bool IsActive_Implementation();
-	
-	void SetUpParameters(UAC_TimeDilation* TimeDilationAC, float Radius, float DilationFactor);
 
-	//REWIND INTERFACE FUNCTIONS
+	// Rewind Interface functions
 	virtual FCharacterData IGetCharacterSnapshot_Implementation() override;
 	virtual void ISetCharacterSnapshot_Implementation(FCharacterData CharData) override;
 	virtual void IEnterRewindState_Implementation() override;
 	virtual void IExitRewindState_Implementation(FCharacterData CharData) override;
 
+	// Function to set up the parameters of the time dilation object,
+	// called by the Time Dilation Component on Begin Play
+	void SetUpParameters(UAC_TimeDilation* TimeDilationAC, float Radius, float DilationFactor);
+
 protected:
 	virtual void BeginPlay() override;
 
-	//THESE VARIABLES WILL BE MOVED TO THE COMPONENT LATER, BUT FOR TESTING PURPOSES THEY ARE IN THE ACTOR FOR NOW
-	//REMOVE BEGIN PLAY TO A FUNCTION CALLED ON SPAWN
-
+	// Standard components
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Flipbook")
 	UPaperFlipbook* Flipbook;
 
@@ -45,20 +51,7 @@ protected:
 
 	USphereComponent* RadiusCollider;
 
-	float MaxTimeDilationFactor;
-	float TimeDilationRadius;
-
 private:
-	//function to create the formula for time dilation based on values set in the editor
-	void CreateFormula();
-	float CalculateTimeDilationFactor(AActor* actor);
+
 	bool isActive;
-
-	// Variables for the formula, (equation of a line)
-	float m, c;
-
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
 };

@@ -9,7 +9,8 @@
 #include "CharacterData.h"
 #include "AC_Rewind.generated.h"
 
-
+// Description: Rewind action, attached to the
+// player character as actor component in editor
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent), BlueprintType, Blueprintable)
 class BRAIDEDED_API UAC_Rewind : public UActorComponent, public IAction
 {
@@ -18,9 +19,8 @@ class BRAIDEDED_API UAC_Rewind : public UActorComponent, public IAction
 public:	
 	// Sets default values for this component's properties
 	UAC_Rewind();
-	~UAC_Rewind();
 
-	// Interface functions
+	// Action interface functions
 	virtual void IActivate_Implementation(float Value) override;
 	virtual void IDeactivate_Implementation() override;
 	virtual void IRecord_Implementation() override;

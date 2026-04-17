@@ -9,10 +9,8 @@
 #include "Components/CapsuleComponent.h"
 #include "EnemyCharacter.generated.h"
 
-/**
- * 
- */
-
+// Description: Enemy character base class,
+// inherits from AMyCharacter, contains basic mechanics
 UCLASS()
 class BRAIDEDED_API AEnemyCharacter : public AMyCharacter
 {
@@ -35,6 +33,7 @@ protected:
 	UBoxComponent* WallChecker;
 	UBoxComponent* FloorChecker;
 
+	// Collision functions
 	virtual void EnableCollision() override;
 	virtual void DisableCollision() override;
 
@@ -53,6 +52,8 @@ protected:
 	FTimerHandle DeathHandle;
 
 private:
+	// Function to handle despawning the enemy after death
+	// allows time for death animation to play before despawning
 	void HandleDespawn();
 	bool canChangeDirection;
 };

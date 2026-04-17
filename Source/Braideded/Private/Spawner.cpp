@@ -5,12 +5,9 @@
 #include "MyCharacter.h"
 #include "Kismet/GameplayStatics.h"
 
-// Sets default values
+// Constructor
 ASpawner::ASpawner()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-
 	Sprite = CreateDefaultSubobject<UPaperSpriteComponent>("Sprite");
 	SetRootComponent(Sprite);
 
@@ -21,14 +18,16 @@ ASpawner::ASpawner()
 	SpawnPoint->SetupAttachment(RootComponent);
 }
 
-// Called when the game starts or when spawned
+
+
+
 void ASpawner::BeginPlay()
 {
 	Super::BeginPlay();
 	
 	isActive = true;
 
-	// Find all objects in object pool of specified type and store them in an array
+	// Find all objects in object pool of selected class in scene
 	TArray<AActor*> OutActors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ObjectToSpawn, OutActors);
 
@@ -40,7 +39,8 @@ void ASpawner::BeginPlay()
 
 	for (AActor* actor : OutActors)
 	{
-		// Crash prevention
+		// Adds all actors of selected class in scene
+		// to the object pool array and despawns them
 		ObjectPool.Add(actor);
 		IPoolableObject::Execute_IDespawn(actor);
 	}
@@ -52,8 +52,8 @@ void ASpawner::BeginPlay()
 
 
 
-//SPAWNING FUNCTIONS
-// General Spawn function
+// Spawning functions
+
 void ASpawner::Spawn()
 {
 	if (!isActive) return;
@@ -81,40 +81,19 @@ void ASpawner::Spawn()
 	}
 }
 
-// This function is called when exiting rewind, this is required to start recurring spawning again via Timers
 void ASpawner::ResumeSpawn()
 {
-	if (!isActive) return;
+	Spawn();
 
-	for (AActor* actor : ObjectPool)
-	{
-		if (!IPoolableObject::Execute_IIsActive(actor))
-		{
-			// Spawn actor at spawn point
-			IPoolableObject::Execute_ISpawn(actor, SpawnPoint->GetComponentLocation(), SpawnRotation);
-
-			// If is character, add impulse
-			AMyCharacter* Character = Cast<AMyCharacter>(actor);
-			if (Character)
-			{
-				Character->LaunchCharacter(SpawnImpulse, false, false);
-			}
-
-			break;
-		}
-		else
-		{
-			continue;
-		}
-	}
-
+	// Setup Timer for recurring spawns
 	GetWorldTimerManager().SetTimer(SpawnHandle, this, &ASpawner::Spawn, SpawnDelay, true);
 }
 
 
 
 
-//REWIND INTERFACE FUNCTIONS
+// Rewind Interface functions
+
 FCharacterData ASpawner::IGetCharacterSnapshot_Implementation()
 {
 	FCharacterData Character = FCharacterData();
@@ -148,7 +127,7 @@ void ASpawner::IExitRewindState_Implementation(FCharacterData CharData)
 
 
 
-//TIME DILATION INTERFACE FUNCTIONS
+// Time Dilation Interface functions
 void ASpawner::IApplyDilationFactor_Implementation(float Factor)
 {
 	this->CustomTimeDilation = Factor;

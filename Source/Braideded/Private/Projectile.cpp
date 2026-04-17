@@ -5,10 +5,9 @@
 #include "MyCharacter.h"
 #include "A_TimeDilationObject.h"
 
-// Sets default values
+// Constructor
 AProjectile::AProjectile()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	Collider = CreateDefaultSubobject<USphereComponent>("Collider");
 	SetRootComponent(Collider);
@@ -20,7 +19,9 @@ AProjectile::AProjectile()
 	Velocity = 100.f;
 }
 
-// Called when the game starts or when spawned
+
+
+
 void AProjectile::BeginPlay()
 {
 	Super::BeginPlay();
@@ -42,6 +43,8 @@ void AProjectile::Tick(float DeltaTime)
 
 
 
+// Function to add velocity to the projectile every tick
+
 void AProjectile::AddVelocity(float DeltaTime)
 {
 	FVector CurrentLocation = GetActorLocation();
@@ -54,8 +57,8 @@ void AProjectile::AddVelocity(float DeltaTime)
 
 
 
+// Rewind Interface Functions
 
-//REWIND INTERFACE FUNCTIONS
 FCharacterData AProjectile::IGetCharacterSnapshot_Implementation()
 {
 	float PlaybackTime = FlipbookComponent->GetPlaybackPosition();
@@ -114,7 +117,8 @@ void AProjectile::IExitRewindState_Implementation(FCharacterData CharData)
 
 
 
-//TIME DILATION INTERFACE FUNCTIONS
+// Time Dilation Interface functions
+
 void AProjectile::IApplyDilationFactor_Implementation(float factor)
 {
 	this->CustomTimeDilation = factor;
@@ -128,19 +132,19 @@ void AProjectile::IClearTimeDilation_Implementation()
 
 
 
-//POOLABLE OBJECT INTERFACE FUNCTIONS
+// Poolable Object interface functions
 void AProjectile::ISetActive_Implementation(bool Active)
 {
-	//set timer to add movement if is active = true
-	//remove timer if active = false and timer is active
 	isActive = Active;
 
 	if (isActive)
 	{
+		// Enable collision when active
 		Collider->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	}
 	else
 	{
+		// Disable collision when not active
 		Collider->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 }
@@ -174,10 +178,11 @@ void AProjectile::IDespawn_Implementation()
 
 
 
-
+// Collision function, despawns projectile on collision with any object, kills character if collides with active character
 
 void AProjectile::OnProjectileCollision(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	//First check: kills character if colliding with active character
 	AMyCharacter* Character = Cast<AMyCharacter>(OtherActor);
 	if (Character && AMyCharacter::Execute_IIsActive(Character))
 	{
@@ -187,7 +192,7 @@ void AProjectile::OnProjectileCollision(UPrimitiveComponent* OverlappedComp, AAc
 	}
 	
 
-	//LAST CHECK: despawns if colliding with object
+	//Last check: despawns if colliding with object
 	if (!Cast<AA_TimeDilationObject>(OtherActor))
 	{
 		IPoolableObject::Execute_IDespawn(this);

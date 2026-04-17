@@ -11,60 +11,66 @@
 #include "InputMappingContext.h"
 #include "Engine/LocalPlayer.h"
 
-// Sets default values
+// Description: The actor that is spawned in scene
+// when the time dilation action is activated,
+// sends the actors that enter its radius to the 
+// Time Dilation Component to time dilation to them
+
+
+// Constructor
 AA_TimeDilationObject::AA_TimeDilationObject()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 
 	PrimaryActorTick.bCanEverTick = true;
+
+	// Radius Collider setup,
+	// Radius size is set in Begin Play with
+	// the value set in the Time Dilation Component
 	RadiusCollider = CreateDefaultSubobject<USphereComponent>(TEXT("RadiusCollider"));
 	RadiusCollider->SetupAttachment(RootComponent);
-	RadiusCollider->SetSphereRadius(TimeDilationRadius);
 
 	FlipbookComponent = CreateDefaultSubobject<UPaperFlipbookComponent>(TEXT("Flipbook"));
 	FlipbookComponent->SetupAttachment(RadiusCollider);
 	FlipbookComponent->SetFlipbook(Flipbook);
 }
 
-// Called when the game starts or when spawned
+
+
+
 void AA_TimeDilationObject::BeginPlay()
 {
 	Super::BeginPlay();
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("TimeDilationObject: hello")));
 	AA_TimeDilationObject::Execute_ISetActive(this, false);
 }
+
+
+
+
+// Function to set up the parameters of the time dilation object,
+// called by the Time Dilation Component on Begin Play
 
 void AA_TimeDilationObject::SetUpParameters(UAC_TimeDilation* TimeDilationAC, float Radius, float DilationFactor)
 {
-	//Binds overlap events to the functions of the TimeDilation Component
 	if (!TimeDilationAC)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("TimeDilationObject: CAST TO TD FAILED")));
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("TimeDilationObject: CAST TO TIME DILATION COMPONENT FAILED")));
 		return;
 	}
 
+	// Binds overlap events to the functions of the TimeDilation Component
 	RadiusCollider->OnComponentBeginOverlap.AddDynamic(TimeDilationAC, &UAC_TimeDilation::AddToAffectedActors);
 	RadiusCollider->OnComponentEndOverlap.AddDynamic(TimeDilationAC, &UAC_TimeDilation::RemoveFromAffectedActors);
 
-	TimeDilationRadius = Radius;
-	MaxTimeDilationFactor = DilationFactor;
-
-	RadiusCollider->SetSphereRadius(TimeDilationRadius);
+	// Set the radius using the radius in the Time Dilation Component
+	RadiusCollider->SetSphereRadius(Radius);
 	AA_TimeDilationObject::Execute_ISetActive(this, false);
 }
 
-// Called every frame
-void AA_TimeDilationObject::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-}
 
 
 
-/// <summary>
 /// OBJECT POOLING FUNCTIONS
-/// </summary>
 
 void AA_TimeDilationObject::SetActive_Implementation(bool Active)
 {
@@ -79,9 +85,7 @@ bool AA_TimeDilationObject::IsActive_Implementation()
 
 
 
-/// <summary>
 /// REWIND INTERFACE FUNCTIONS
-/// </summary>
 
 FCharacterData AA_TimeDilationObject::IGetCharacterSnapshot_Implementation()
 {

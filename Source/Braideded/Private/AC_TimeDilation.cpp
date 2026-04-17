@@ -5,65 +5,72 @@
 #include "Kismet/GameplayStatics.h"
 #include "A_TimeDilationObject.h"
 
-// Sets default values for this component's properties
+// Description: Time Dilation action, attached to the player character, 
+// Time Dilation Actor must be in scene for the action to work 
+
+
+// Constructor
 UAC_TimeDilation::UAC_TimeDilation()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-
-	// ...
 }
 
 
-// Called when the game starts
+
+
 void UAC_TimeDilation::BeginPlay()
 {
 	Super::BeginPlay();
 	CreateFormula();
-	CastToTDObject();
-
-	// ...
-	
+	CastToTDObject();	
 }
 
+void UAC_TimeDilation::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	//Record time dilation values for actors in the scene
+	if (!TimeDilationActor) return;
+	UAC_TimeDilation::Execute_IRecord(this);
+}
+
+
+
+// Calculates the constants for the formula
+// y = mx + c, based on parameters set
 void UAC_TimeDilation::CreateFormula()
 {
-	// Create the formula for time dilation based on values set in the editor
-	// The formula is a linear equation of the form y = mx + c, where y is the time dilation factor, x is the distance from the center of the object, m is the slope of the line, and c is the y-intercept
 	m = (1.f - MaxTimeDilationFactor) / (TimeDilationRadius - TimeDilationMaxRadius);
 	c = 1.f - (m * TimeDilationRadius);
 }
 
 void UAC_TimeDilation::CastToTDObject() 
 {
-	//Sets the parameters of the TimeDilation Object
 	AActor* actor = UGameplayStatics::GetActorOfClass(GetWorld(), AA_TimeDilationObject::StaticClass());
 	TimeDilationActor = Cast<AA_TimeDilationObject>(actor);
 
 	if (TimeDilationActor)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("AC_TimeDilation: Casted to TDObejct")));
+		//Sets the parameters of the Time Dilation Object
 		TimeDilationActor->SetUpParameters(this, TimeDilationRadius, MaxTimeDilationFactor);
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("AC_TimeDilation: Casted to TimeDilationObject")));
 	}
 	else
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("AC_TimeDilation: Cast to TDObejct FAILED, add TimeDilationObject to scene")));
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("AC_TimeDilation: Cast to TimeDilationObject FAILED, add TimeDilationObject to scene")));
 	}
 }
 
-// Called every frame
-void UAC_TimeDilation::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	//Record time dilation values for actors in the scene
-	if (!TimeDilationActor) return;
-	UAC_TimeDilation::Execute_IRecord(this);
-}
+
+
+
+// Action interface functions
 
 void UAC_TimeDilation::IActivate_Implementation(float Value)
 {
-	//set time dilation actor to active
+	// Set time dilation actor to active
 	if (!TimeDilationActor) return;
 
 	AA_TimeDilationObject::Execute_ISetActive(TimeDilationActor, true);
@@ -74,7 +81,7 @@ void UAC_TimeDilation::IDeactivate_Implementation()
 {
 	if (!TimeDilationActor) return;
 
-	//clear the time dilation of all affected actors
+	// Clear the time dilation of all affected actors
 	if (AffectedActors.Num() > 0)
 	{
 		for (AActor* actor : AffectedActors)
@@ -86,7 +93,7 @@ void UAC_TimeDilation::IDeactivate_Implementation()
 		}
 	}
 
-	//set time dilation actor to inactive
+	// Set time dilation actor to inactive
 	AA_TimeDilationObject::Execute_ISetActive(TimeDilationActor, false);
 	TimeDilationActor->SetActorLocation(FVector(0.f, 0.f, 0.f));
 }
@@ -110,7 +117,7 @@ void UAC_TimeDilation::IRecord_Implementation()
 
 void UAC_TimeDilation::IClear_Implementation()
 {
-	// Clear recorded time dilation values
+	// Clear recorded time dilation values for each actor
 	for (AActor* actor : AffectedActors) 
 	{
 		if (actor->GetClass()->ImplementsInterface(UDilatable::StaticClass())) 
@@ -119,9 +126,13 @@ void UAC_TimeDilation::IClear_Implementation()
 		}
 	}
 
+	// Clear arrays
 	AffectedActors.Empty();
 	DilatableActors.Empty();
 }
+
+
+
 
 float UAC_TimeDilation::CalculateTimeDilationFactor(AActor* actor)
 {
@@ -129,8 +140,6 @@ float UAC_TimeDilation::CalculateTimeDilationFactor(AActor* actor)
 
 	float TimeDilationFactor = 1.f;
 	float Distance = FVector::Dist(TimeDilationActor->GetActorLocation(), actor->GetActorLocation());
-	//FString Dist = FString::SanitizeFloat(Distance);
-	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, *Dist);
 
 	TimeDilationFactor = (m * Distance) + c;
 
@@ -149,6 +158,7 @@ void UAC_TimeDilation::AddToAffectedActors(UPrimitiveComponent* OverlappedComp, 
 {
 	if (OtherActor->GetClass()->ImplementsInterface(UDilatable::StaticClass()) && !AffectedActors.Contains(OtherActor))
 	{
+		// Adds actors that enter the radius of the Time Dilation Object to the AffectedActors array
 		AffectedActors.Add(OtherActor);
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Actor is in zone"));
 	}
@@ -158,6 +168,7 @@ void UAC_TimeDilation::RemoveFromAffectedActors(UPrimitiveComponent* OverlappedC
 {
 	if (OtherActor->GetClass()->ImplementsInterface(UDilatable::StaticClass()) && AffectedActors.Contains(OtherActor))
 	{
+		// Removes actors that leave the radius of the Time Dilation Object from the AffectedActors array
 		AffectedActors.Remove(OtherActor);
 		IDilatable::Execute_IClearTimeDilation(OtherActor);
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Actor has left zone"));

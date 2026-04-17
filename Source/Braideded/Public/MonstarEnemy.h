@@ -8,9 +8,7 @@
 #include "Dilatable.h"
 #include "MonstarEnemy.generated.h"
 
-/**
- * 
- */
+// Description: Basic enemy, walks back and forth
 UCLASS()
 class BRAIDEDED_API AMonstarEnemy : public AEnemyCharacter, public IRewindable, public IDilatable 
 {
@@ -22,12 +20,13 @@ public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 
-	//REWIND INTERFACE FUNCTIONS
+	//Rewind interface functions
 	virtual FCharacterData IGetCharacterSnapshot_Implementation() override;
 	virtual void ISetCharacterSnapshot_Implementation(FCharacterData CharData) override;
 	virtual void IEnterRewindState_Implementation() override;
 	virtual void IExitRewindState_Implementation(FCharacterData CharData) override;
 
+	// Time Dilation interface functions
 	virtual void IApplyDilationFactor_Implementation(float Factor) override;
 	virtual void IClearTimeDilation_Implementation() override;
 

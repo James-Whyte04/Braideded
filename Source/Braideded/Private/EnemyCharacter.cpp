@@ -9,6 +9,12 @@
 #include "Spawner.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
+// Description: Enemy character base class,
+// inherits from AMyCharacter, contains basic mechanics
+
+
+// Constructor
+
 AEnemyCharacter::AEnemyCharacter()
 {
 	float Radius = GetCapsuleComponent()->GetScaledCapsuleRadius();
@@ -38,13 +44,15 @@ AEnemyCharacter::AEnemyCharacter()
 	CharacterComponent = GetCharacterMovement();
 }
 
+
+
+
 void AEnemyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
 	canFall = true;
 	canChangeDirection = true;
-	//isVisible = true;
 	isDead = false;
 #
 	if (canFall)
@@ -56,6 +64,7 @@ void AEnemyCharacter::BeginPlay()
 		FloorChecker->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	}
 
+	// Binds collision functions to collision events
 	GetCapsuleComponent()->OnComponentHit.AddDynamic(this, &AEnemyCharacter::BodyHit);
 	HeadCollider->OnComponentBeginOverlap.AddDynamic(this, &AEnemyCharacter::HeadHit);
 	FloorChecker->OnComponentEndOverlap.AddDynamic(this, &AEnemyCharacter::CheckFloor);
@@ -65,9 +74,7 @@ void AEnemyCharacter::BeginPlay()
 
 
 
-/// <summary>
-/// BASE DEATH FUNCTIONALITY
-/// </summary>
+// Base death function
 
 void AEnemyCharacter::Death()
 {
@@ -87,9 +94,8 @@ void AEnemyCharacter::HandleDespawn()
 
 
 
-/// <summary>
-/// BASE MOVE FUNCTIONALITY
-/// </summary>
+
+// Base movement functions
 
 void AEnemyCharacter::Move(float DeltaTime)
 {
@@ -98,10 +104,10 @@ void AEnemyCharacter::Move(float DeltaTime)
 		return;
 	}
 
-	//Add velocity
+	// Add velocity
 	AddMovementInput(GetActorForwardVector(), WalkSpeed * DeltaTime);
 
-	//Set flipbook
+	// Set flipbook
 	if (CharacterComponent->IsFalling())
 	{
 		if (CharacterComponent->Velocity.Z < 0.f)
@@ -123,6 +129,7 @@ void AEnemyCharacter::ChangeDirection()
 {
 	canChangeDirection = false;
 
+	// Flip character rotation
 	FRotator Rotation = GetActorRotation();
 	FTransform NewTransform = FTransform(FRotator(Rotation.Pitch, Rotation.Yaw - 180.f, Rotation.Roll),
 		GetActorLocation(),
@@ -130,6 +137,7 @@ void AEnemyCharacter::ChangeDirection()
 
 	SetActorTransform(NewTransform);
 
+	// Crash prevention: set timer to prevent multiple direction changes in one frame
 	GetWorldTimerManager().SetTimerForNextTick([this]()
 		{ canChangeDirection = true;} );
 }
@@ -137,9 +145,7 @@ void AEnemyCharacter::ChangeDirection()
 
 
 
-/// <summary>
-/// BASE COLLISION FUNCTIONALITY
-/// </summary>
+// Base collision functions
 
 void AEnemyCharacter::EnableCollision()
 {
@@ -148,10 +154,12 @@ void AEnemyCharacter::EnableCollision()
 	HeadCollider->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	if (canFall)
 	{
+		// Disables collision on floor checker, enabling falling
 		FloorChecker->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 	else
 	{
+		// Enables collision on floor checker, preventing falling
 		FloorChecker->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	}
 
@@ -174,23 +182,24 @@ void AEnemyCharacter::CheckWall(UPrimitiveComponent* OverlappedComp, AActor* Oth
 
 	if (Cast<APaperTileMapActor>(OtherActor))
 	{
+		// Changes direction if the hit component is a TileMapActor
 		ChangeDirection();
 		return;
 	}
 
 	else if (Cast<ASpawner>(OtherActor))
 	{
+		// Changes direction if the hit component is a Spawner
 		ChangeDirection();
 		return;
 	}
 
 	else if (Cast<AEnemyCharacter>(OtherActor) && OtherActor != this)
 	{
+		// Changes direction if the hit component is another enemy character
 		ChangeDirection();
 		return;
 	}
-
-	//do same check for projectile when implemented
 }
 
 void AEnemyCharacter::CheckFloor(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
@@ -199,6 +208,8 @@ void AEnemyCharacter::CheckFloor(UPrimitiveComponent* OverlappedComp, AActor* Ot
 	APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor);
 	if (Player == nullptr && !canFall)
 	{
+		// Changes direction if the hit component is not
+		// a player character and the enemy cannot fall
 		ChangeDirection();
 	}
 }
@@ -209,6 +220,8 @@ void AEnemyCharacter::HeadHit(UPrimitiveComponent* OverlappedComp, AActor* Other
 	APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor);
 	if (Player)
 	{
+		// Sets player velocity to 0 and launches player up
+		// for consistent bounce height
 		Player->GetCharacterMovement()->Velocity.Z = 0.f;
 		Player->LaunchCharacter(FVector(0.f, 0.f, 1000.f), false, false);
 		Death();
@@ -221,6 +234,7 @@ void AEnemyCharacter::BodyHit(UPrimitiveComponent* HitComp, AActor* OtherActor, 
 	APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor);
 	if (Player)
 	{
+		// Kills player
 		Player->Death();
 	}
 }

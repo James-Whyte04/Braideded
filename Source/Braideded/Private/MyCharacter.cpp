@@ -8,42 +8,37 @@
 #include "PaperTileSet.h"
 #include "Projectile.h"
 
+// Description: Base character class,
+// contains basic movement and mechanics
+// that are shared between the player and enemies
+
+
+// Constructor
 AMyCharacter::AMyCharacter()
 {
-	//PrimaryActorTick.bCanEverTick = true;
-	//WalkSpeed = 300.f;
-	//SprintSpeed = 600.f;
 	FlipbookComponent = GetSprite();
 	CharacterComponent = GetCharacterMovement();
 }
 
 
 
-//DEFAULT FUNCTIONS
+
 void AMyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	//Hook up OnSpikeCollision to OnComponentHit
+	//Binds OnSpikeCollision to OnComponentHit
 	GetCapsuleComponent()->OnComponentHit.AddDynamic(this, &AMyCharacter::OnSpikeCollision);
 	GetCapsuleComponent()->BodyInstance.bLockYTranslation = true; // Lock Y Location
 	GetCapsuleComponent()->BodyInstance.bLockXRotation = true;    // Lock X Rotation
 	GetCapsuleComponent()->BodyInstance.bLockZRotation = true;	 // Lock Z Rotation
 }
 
-void AMyCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
-{
-	Super::EndPlay(EndPlayReason);
-}
-
-void AMyCharacter::Landed(const FHitResult& Hit)
-{
-	Super::Landed(Hit);
-}
 
 
 
-//POOLABLE INTERFACE FUNCTIONS
+// Poolable Object Interface functions
+
 void AMyCharacter::ISetActive_Implementation(bool Active)
 {
 	isVisible = Active;
@@ -72,7 +67,7 @@ void AMyCharacter::IDespawn_Implementation()
 
 
 
-//COLLISION FUNCTIONS
+// Collision functions
 void AMyCharacter::EnableCollision()
 {
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);

@@ -4,6 +4,10 @@
 #include "MonstarEnemy.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
+// Description: Basic enemy, walks back and forth
+
+
+// Constructor
 AMonstarEnemy::AMonstarEnemy()
 {
 	WalkSpeed = 200.f;
@@ -38,6 +42,9 @@ AMonstarEnemy::AMonstarEnemy()
 	CharacterComponent->bOrientRotationToMovement = false;
 }
 
+
+
+
 void AMonstarEnemy::BeginPlay()
 {
 	Super::BeginPlay();
@@ -57,9 +64,7 @@ void AMonstarEnemy::Tick(float DeltaTime)
 
 
 
-/// <summary>
-/// REWIND INTERFACE FUNCTIONS
-/// </summary>
+// Rewind interface functions
 
 FCharacterData AMonstarEnemy::IGetCharacterSnapshot_Implementation()
 {
@@ -89,6 +94,7 @@ void AMonstarEnemy::ISetCharacterSnapshot_Implementation(FCharacterData CharData
 
 void AMonstarEnemy::IEnterRewindState_Implementation()
 {
+	SetActorTickEnabled(false);
 	DisableCollision();
 	CharacterComponent->DisableMovement();
 	FlipbookComponent->Stop();
@@ -117,13 +123,11 @@ void AMonstarEnemy::IExitRewindState_Implementation(FCharacterData CharData)
 	{
 		DisableCollision();
 		Death();
-	//	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "MonstarEnemy.cpp: dead");
 		return;
 	}
 	else
 	{
 		EnableCollision();
-	//	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("MonstarEnemy.cpp: alive and well")));
 	}
 
 	//Set movement mode
@@ -132,6 +136,7 @@ void AMonstarEnemy::IExitRewindState_Implementation(FCharacterData CharData)
 	//Set velocity
 	CharacterComponent->Velocity = CharData.Velocity;
 
+	// Set flipbook based on movement mode and velocity
 	switch (CharacterComponent->MovementMode)
 	{
 	case MOVE_Falling:
@@ -157,13 +162,13 @@ void AMonstarEnemy::IExitRewindState_Implementation(FCharacterData CharData)
 	}
 
 	AMonstarEnemy::Execute_ISetActive(this, CharData.IsVisible);
+	SetActorTickEnabled(true);
 }
 
 
 
-/// <summary>
-/// TIME DILATION INTERFACE FUNCTIONS
-/// </summary>
+
+// Time Dilation Interface functions
 
 void AMonstarEnemy::IApplyDilationFactor_Implementation(float Factor)
 {

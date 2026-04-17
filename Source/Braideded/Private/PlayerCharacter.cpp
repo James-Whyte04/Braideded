@@ -13,7 +13,11 @@
 #include "Kismet/GameplayStatics.h"
 #include "AC_Rewind.h"
 
+// Description: Player character class, inherits from AMyCharacter,
+// contains player mechanics such as movement and actions
 
+
+// Constructor
 APlayerCharacter::APlayerCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -39,9 +43,6 @@ APlayerCharacter::APlayerCharacter()
 
 
 
-/// <summary>
-/// DEFAULT UE FUNCTIONS
-/// </summary>
 
 void APlayerCharacter::BeginPlay()
 {
@@ -88,9 +89,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 
 
-/// <summary>
-/// MOVEMENT FUNCTIONS
-/// </summary>
+
+/// Movement functions
 
 void APlayerCharacter::StopWalk(const FInputActionValue& Value) 
 {
@@ -100,6 +100,7 @@ void APlayerCharacter::StopWalk(const FInputActionValue& Value)
 
 void APlayerCharacter::Walk(const FInputActionValue& Value)
 {
+	// Set jump flipbook if player is airborne
 	if (CharacterComponent->IsFalling()) 
 	{
 		FlipbookComponent->SetFlipbook(JumpFlipbook);
@@ -107,9 +108,11 @@ void APlayerCharacter::Walk(const FInputActionValue& Value)
 
 	if (Value.Get<float>() > 0) 
 	{
+		// Adds movement input and sets flipbook rotation based on movement direction
 		AddMovementInput(FVector::ForwardVector, Value.Get<float>());
 		FlipbookComponent->SetRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
 
+		// Set walk flipbook if player is grounded
 		if (!CharacterComponent->IsMovingOnGround()) return;
 		FlipbookComponent->SetFlipbook(WalkFlipbook);
 	}
@@ -123,6 +126,7 @@ void APlayerCharacter::Walk(const FInputActionValue& Value)
 	}
 	else 
 	{
+		// Set idle flipbook if player is grounded and not moving
 		if (!CharacterComponent->IsMovingOnGround()) return;
 		FlipbookComponent->SetFlipbook(IdleFlipbook);
 	}
@@ -143,19 +147,20 @@ void APlayerCharacter::Landed(const FHitResult& Hit)
 {
 	Super::Landed(Hit);
 	if (CharacterComponent->GetCurrentAcceleration().X != 0) return;
+
+	// Set flipbook to idle if not moving on landing 
 	FlipbookComponent->SetFlipbook(IdleFlipbook);
 }
 
 
 
-/// <summary>
-/// ABILITY FUNCTIONS
-/// </summary>
- 
-//ACTIVATE
+
+//Action functions
+
+// Activate functions
 void APlayerCharacter::ActivateAction1(const FInputActionValue& Value)
 {
-	// Implement action 1 behavior here
+	// Crash prevention: Prevents function from being called on null object
 	if (ActionObj1 == nullptr) return;
 	
 
@@ -163,17 +168,18 @@ void APlayerCharacter::ActivateAction1(const FInputActionValue& Value)
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 		{
+			// Removes the default input mapping context,
+			// adds the ability input mapping context
 			Subsystem->RemoveMappingContext(IMC_Default);
 			Subsystem->AddMappingContext(IMC_Ability1, 0);
 		}
 	}
-
+	// Executes action activate function
 	IAction::Execute_IActivate(ActionObj1, Value.Get<float>());
 }
 
 void APlayerCharacter::ActivateAction2(const FInputActionValue& Value)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "PlayerCharacter.cpp: Activating Ability 2");
 	if (ActionObj2 == nullptr) return;
 
 
@@ -191,26 +197,28 @@ void APlayerCharacter::ActivateAction2(const FInputActionValue& Value)
 
 
 
-//DEACTIVATE
+// Deactivate functions
 void APlayerCharacter::DeactivateAction1(const FInputActionValue& Value)
 {
+	// Crash prevention: Prevents function from being called on null object
 	if (ActionObj1 == nullptr) return;
 
 	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 		{
+			// Removes the ability input mapping context,
+			// reverts to the default input mapping context
 			Subsystem->RemoveMappingContext(IMC_Ability1);
 			Subsystem->AddMappingContext(IMC_Default, 0);
 		}
 	}
-	
+	// Executes action deactivate function
 	IAction::Execute_IDeactivate(ActionObj1);
 }
 
 void APlayerCharacter::DeactivateAction2(const FInputActionValue& Value)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "PlayerCharacter.cpp: Deactivating");
 	if (ActionObj2 == nullptr) return;
 
 	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
@@ -227,9 +235,8 @@ void APlayerCharacter::DeactivateAction2(const FInputActionValue& Value)
 
 
 
-/// <summary>
-/// REWIND INTERFACE FUNCTIONS
-/// </summary>
+
+// Rewind Interface Functions
 
 FCharacterData APlayerCharacter::IGetCharacterSnapshot_Implementation() 
 {
@@ -276,9 +283,9 @@ void APlayerCharacter::IExitRewindState_Implementation(FCharacterData CharData)
 	//Set velocity
 	CharacterComponent->Velocity = CharData.Velocity;
 
-	//Set flipbook and frame
 	FlipbookComponent->Play();
 
+	// Sets the correct flipbook based on movement mode and acceleration
 	switch (CharacterComponent->MovementMode)
 	{
 	case MOVE_Falling:
@@ -306,9 +313,8 @@ void APlayerCharacter::IExitRewindState_Implementation(FCharacterData CharData)
 
 
 
-/// <summary>
-/// TIME DILATION INTERFACE FUNCTIONS
-/// </summary>
+
+// Time Dilation Interface Functions
 
 void APlayerCharacter::IApplyDilationFactor_Implementation(float Factor) 
 {
@@ -322,12 +328,15 @@ void APlayerCharacter::IClearTimeDilation_Implementation()
 
 
 
-/// <summary>
-/// ACTION RELATED FUNCTIONS
-/// </summary>
+
+/// Action Functions
 
 int APlayerCharacter::RewindCheck()
 {
+	// Checks if either ActionComponent is a UAC_Rewind,
+	// returns 1 if ActionComponent1 is UAC_Rewind,
+	// 2 if ActionComponent2 is UAC_Rewind,
+	// and 0 if neither are UAC_Rewind
 	UAC_Rewind* RewindComponent = Cast<UAC_Rewind>(ActionComponent1);
 
 	if (RewindComponent)
@@ -342,12 +351,13 @@ int APlayerCharacter::RewindCheck()
 		return 2;
 	}
 
-	
 	return 0;
 }
 
 void APlayerCharacter::SetActions()
 {
+	// Spawns the Action Actor Components based on the
+	// Action1 and Action2 TSubclass variables set in editor
 	if (Action1)
 	{
 		ActionComponent1 = NewObject<UActorComponent>(this, Action1);
@@ -366,6 +376,7 @@ void APlayerCharacter::SetActions()
 
 void APlayerCharacter::ClearActions()
 {
+	// Clears the Action Actor Components from the player character
 	if (ActionComponent1)
 	{
 		ActionComponent1->DestroyComponent();
