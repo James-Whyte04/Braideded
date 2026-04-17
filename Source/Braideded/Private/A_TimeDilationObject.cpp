@@ -14,7 +14,8 @@
 // Description: The actor that is spawned in scene
 // when the time dilation action is activated,
 // sends the actors that enter its radius to the 
-// Time Dilation Component to time dilation to them
+// Time Dilation Component to apply time dilation to them,
+// MUST BE PRESENT IN SCENE FOR THE TIME DILATION ABILITY TO WORK
 
 
 // Constructor

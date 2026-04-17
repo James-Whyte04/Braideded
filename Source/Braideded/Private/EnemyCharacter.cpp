@@ -84,6 +84,7 @@ void AEnemyCharacter::Death()
 	GetCharacterMovement()->Velocity.Z = 0.f;
 	LaunchCharacter(FVector(0.f, 0.f, 100.f), false, false);
 
+	// Sets timer to despawn after death animation plays
 	GetWorldTimerManager().SetTimer(DeathHandle, this, &AEnemyCharacter::HandleDespawn, 1.f, false);
 }
 

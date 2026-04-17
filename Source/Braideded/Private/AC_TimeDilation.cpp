@@ -109,8 +109,6 @@ void UAC_TimeDilation::IRecord_Implementation()
 		{
 			float TimeDilationFactor = CalculateTimeDilationFactor(actor);
 			IDilatable::Execute_IApplyDilationFactor(actor, TimeDilationFactor);
-		//	FString FloatStr = FString::SanitizeFloat(TimeDilationFactor);
-		//	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, *FloatStr);
 		}
 	}
 }
