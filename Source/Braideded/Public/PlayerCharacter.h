@@ -37,12 +37,13 @@ public:
 	// Input setup
 	void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	//Rewindable interface functions
+	// Rewindable interface functions
 	virtual FCharacterData IGetCharacterSnapshot_Implementation() override;
 	virtual void ISetCharacterSnapshot_Implementation(FCharacterData CharData) override;
 	virtual void IEnterRewindState_Implementation() override;
 	virtual void IExitRewindState_Implementation(FCharacterData CharData) override;
 
+	// Time dilation interface functions
 	virtual void IApplyDilationFactor_Implementation(float Factor);
 	virtual void IClearTimeDilation_Implementation();
 

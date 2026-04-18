@@ -149,6 +149,7 @@ void UAC_Rewind::IRecord_Implementation()
 {
 	if (RewindableActors.Num() == 0) return;
 
+	// Record the snapshot of each rewindable actor
 	for (int i = 0; i < RewindableActors.Num(); i++) 
 	{
 		if (!IsValid(RewindableActors[i]))

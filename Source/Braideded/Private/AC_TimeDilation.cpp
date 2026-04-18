@@ -75,6 +75,8 @@ void UAC_TimeDilation::IActivate_Implementation(float Value)
 
 	AA_TimeDilationObject::Execute_ISetActive(TimeDilationActor, true);
 	TimeDilationActor->SetActorLocation(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)->GetActorLocation());
+
+	SetComponentTickEnabled(true);
 }
 
 void UAC_TimeDilation::IDeactivate_Implementation()
@@ -96,6 +98,8 @@ void UAC_TimeDilation::IDeactivate_Implementation()
 	// Set time dilation actor to inactive
 	AA_TimeDilationObject::Execute_ISetActive(TimeDilationActor, false);
 	TimeDilationActor->SetActorLocation(FVector(0.f, 0.f, 0.f));
+
+	SetComponentTickEnabled(false);
 }
 
 void UAC_TimeDilation::IRecord_Implementation()
