@@ -27,8 +27,8 @@ public:
 	AA_TimeDilationObject();
 
 	// IPoolableObject interface functions
-	virtual void SetActive_Implementation(bool Active);
-	virtual bool IsActive_Implementation();
+	virtual void ISetActive_Implementation(bool Active) override;
+	virtual bool IIsActive_Implementation() override;
 
 	// Rewind Interface functions
 	virtual FCharacterData IGetCharacterSnapshot_Implementation() override;
@@ -41,7 +41,6 @@ public:
 	void SetUpParameters(UAC_TimeDilation* TimeDilationAC, float Radius, float DilationFactor);
 
 protected:
-	virtual void BeginPlay() override;
 
 	// Standard components
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Flipbook")

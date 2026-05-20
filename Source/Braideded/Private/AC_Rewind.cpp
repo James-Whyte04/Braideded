@@ -15,7 +15,7 @@
 UAC_Rewind::UAC_Rewind()
 {
 	PrimaryComponentTick.bCanEverTick = true;
-	bufferSize = 2000;
+	bufferSize = 1000;
 	currentBufferIndex = 1;
 }
 

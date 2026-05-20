@@ -39,15 +39,6 @@ AA_TimeDilationObject::AA_TimeDilationObject()
 
 
 
-void AA_TimeDilationObject::BeginPlay()
-{
-	Super::BeginPlay();
-	AA_TimeDilationObject::Execute_ISetActive(this, false);
-}
-
-
-
-
 // Function to set up the parameters of the time dilation object,
 // called by the Time Dilation Component on Begin Play
 
@@ -65,7 +56,7 @@ void AA_TimeDilationObject::SetUpParameters(UAC_TimeDilation* TimeDilationAC, fl
 
 	// Set the radius using the radius in the Time Dilation Component
 	RadiusCollider->SetSphereRadius(Radius);
-	AA_TimeDilationObject::Execute_ISetActive(this, false);
+	IPoolableObject::Execute_ISetActive(this, false);
 }
 
 
@@ -73,13 +64,13 @@ void AA_TimeDilationObject::SetUpParameters(UAC_TimeDilation* TimeDilationAC, fl
 
 /// OBJECT POOLING FUNCTIONS
 
-void AA_TimeDilationObject::SetActive_Implementation(bool Active)
+void AA_TimeDilationObject::ISetActive_Implementation(bool Active)
 {
 	isActive = Active;
-	SetActorHiddenInGame(!Active);
+	SetActorHiddenInGame(!isActive);
 }
 
-bool AA_TimeDilationObject::IsActive_Implementation()
+bool AA_TimeDilationObject::IIsActive_Implementation()
 {
 	return isActive;
 }
@@ -98,7 +89,7 @@ FCharacterData AA_TimeDilationObject::IGetCharacterSnapshot_Implementation()
 		FlipbookComponent->GetFlipbook(),
 		FlipbookComponent->GetFlipbook()->GetKeyFrameIndexAtTime(PlaybackTime),
 		MOVE_None,
-		isActive);
+		IPoolableObject::Execute_IIsActive(this));
 
 	return object;
 }
@@ -109,7 +100,7 @@ void AA_TimeDilationObject::ISetCharacterSnapshot_Implementation(FCharacterData 
 	SetActorRotation(CharData.CharacterRotation);
 	FlipbookComponent->SetFlipbook(CharData.Flipbook);
 	FlipbookComponent->SetPlaybackPosition(CharData.Frame, true);
-	AA_TimeDilationObject::Execute_ISetActive(this, CharData.IsVisible);
+	IPoolableObject::Execute_ISetActive(this, CharData.IsVisible);
 }
 
 void AA_TimeDilationObject::IEnterRewindState_Implementation()
@@ -119,29 +110,23 @@ void AA_TimeDilationObject::IEnterRewindState_Implementation()
 
 void AA_TimeDilationObject::IExitRewindState_Implementation(FCharacterData CharData)
 {
-	if (!isActive) return;
-	AActor* actor = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerController::StaticClass());
-	
-	if (!actor) return;
-
-	if (APlayerController* PlayerController = Cast<APlayerController>(actor))
+	if (!isActive) 
 	{
-		UInputMappingContext* IMC = LoadObject<UInputMappingContext>(nullptr, TEXT("/Game/Input/InputMappingContext/IMC_TimeDilation.IMC_TimeDilation"));
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
-		{
-			Subsystem->ClearAllMappings();
-			Subsystem->AddMappingContext(IMC, 0);
-
-			PlayerController = nullptr;
-			delete PlayerController;
-
-			Subsystem = nullptr;
-			delete Subsystem;
-
-			IMC = nullptr;
-			delete IMC;
-		}
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Time Dilation Object is not active, skipping input remapping")));
+		return;
 	}
-	actor = nullptr;
-	delete actor;
+
+	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+
+	if (!PlayerController) return;
+
+	UInputMappingContext* IMC = LoadObject<UInputMappingContext>(nullptr, TEXT("/Game/Input/InputMappingContext/IMC_TimeDilation.IMC_TimeDilation"));
+		
+	if (!IMC) return;
+
+	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+	{
+		Subsystem->ClearAllMappings();
+		Subsystem->AddMappingContext(IMC, 0);
+	}
 }

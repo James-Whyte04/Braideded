@@ -4,6 +4,7 @@
 #include "AC_TimeDilation.h"
 #include "Kismet/GameplayStatics.h"
 #include "A_TimeDilationObject.h"
+#include "PoolableObject.h"
 
 // Description: Time Dilation action, attached to the player character, 
 // Time Dilation Actor must be in scene for the action to work 
@@ -23,6 +24,7 @@ UAC_TimeDilation::UAC_TimeDilation()
 void UAC_TimeDilation::BeginPlay()
 {
 	Super::BeginPlay();
+	SetComponentTickEnabled(false);
 	CreateFormula();
 	CastToTDObject();	
 }
@@ -34,6 +36,11 @@ void UAC_TimeDilation::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	//Record time dilation values for actors in the scene
 	if (!TimeDilationActor) return;
 	UAC_TimeDilation::Execute_IRecord(this);
+
+	if (!IPoolableObject::Execute_IIsActive(TDObject))
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("AC_TimeDilation: Time Dilation Actor is not active")));
+	}
 }
 
 
@@ -56,6 +63,7 @@ void UAC_TimeDilation::CastToTDObject()
 		//Sets the parameters of the Time Dilation Object
 		TimeDilationActor->SetUpParameters(this, TimeDilationRadius, MaxTimeDilationFactor);
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("AC_TimeDilation: Casted to TimeDilationObject")));
+		TDObject = Cast<UObject>(TimeDilationActor);
 	}
 	else
 	{
@@ -73,7 +81,8 @@ void UAC_TimeDilation::IActivate_Implementation(float Value)
 	// Set time dilation actor to active
 	if (!TimeDilationActor) return;
 
-	AA_TimeDilationObject::Execute_ISetActive(TimeDilationActor, true);
+	IPoolableObject::Execute_ISetActive(TDObject, true);
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("AC_TimeDilation: Activated")));
 	TimeDilationActor->SetActorLocation(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)->GetActorLocation());
 
 	SetComponentTickEnabled(true);
@@ -96,7 +105,8 @@ void UAC_TimeDilation::IDeactivate_Implementation()
 	}
 
 	// Set time dilation actor to inactive
-	AA_TimeDilationObject::Execute_ISetActive(TimeDilationActor, false);
+	IPoolableObject::Execute_ISetActive(TDObject, false);
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("AC_TimeDilation: Deactivated")));
 	TimeDilationActor->SetActorLocation(FVector(0.f, 0.f, 0.f));
 
 	SetComponentTickEnabled(false);

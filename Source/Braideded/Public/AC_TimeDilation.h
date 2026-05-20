@@ -43,6 +43,7 @@ protected:
 
 	// Reference to the Time Dilation Actor in scene
 	AA_TimeDilationObject* TimeDilationActor;
+	UObject* TDObject;
 
 	// Max time dilation factor
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Time Dilation")
